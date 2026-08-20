@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { z } from "zod";
 
-import { createSessionCookie, verifyPassphrase } from "../../lib/server/session";
+import { createSessionCookie, isHttpsRequest, verifyPassphrase } from "../../lib/server/session";
 
 const bodySchema = z.object({ passphrase: z.string().min(1) });
 
@@ -22,6 +22,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  res.setHeader("Set-Cookie", createSessionCookie());
+  res.setHeader("Set-Cookie", createSessionCookie(isHttpsRequest(req)));
   res.status(200).json({ ok: true });
 }

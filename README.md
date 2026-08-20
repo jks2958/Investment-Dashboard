@@ -14,7 +14,11 @@ modeled on a full dashboard UI reference.
 
 ## Run & Operate
 
-- `npm run dev` — start the frontend dev server
+- `npm run dev` — start the frontend dev server (UI only — does **not** serve
+  `/api`; use this for pure UI iteration, not for testing auth or data)
+- `vercel dev` — full local stack, frontend + `/api` functions together
+  (requires the Vercel CLI and `vercel link` against your project; needed to
+  actually exercise login, holdings, prices, etc. locally)
 - `npm run build` — typecheck + build for production
 - `npm run typecheck` — typecheck only
 - `npm run db:push` — push DB schema changes (dev only)
@@ -35,7 +39,7 @@ CoinGecko needs no API key for crypto prices.
 2. Generate `AUTH_SESSION_SECRET` (e.g. `openssl rand -base64 32`) and pick an `AUTH_PASSPHRASE`.
 3. Get a free Twelve Data API key for `TWELVE_DATA_API_KEY`.
 4. `npm install && npm run db:push` to create the tables.
-5. `npm run dev`, then enter your passphrase to unlock the dashboard.
+5. `vercel dev` (not `npm run dev` — see above), then enter your passphrase to unlock the dashboard.
 6. For crypto holdings/wishlist items, use the CoinGecko coin id as the symbol (e.g. `bitcoin`, `ethereum`), not the ticker.
 
 To deploy: import the repo into Vercel, set the same env vars there, and connect the same Neon database.

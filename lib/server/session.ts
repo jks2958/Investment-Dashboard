@@ -7,6 +7,10 @@ const COOKIE_NAME = "session";
 const AUTH_CONFIG_ID = 1;
 const MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
 
+export function isHttpsRequest(req: { headers: { [key: string]: string | string[] | undefined } }): boolean {
+  return req.headers["x-forwarded-proto"] === "https";
+}
+
 function getSecret(): string {
   const secret = process.env.AUTH_SESSION_SECRET;
   if (!secret) throw new Error("AUTH_SESSION_SECRET is not set");
@@ -17,16 +21,18 @@ function sign(value: string): string {
   return createHmac("sha256", getSecret()).update(value).digest("base64url");
 }
 
-export function createSessionCookie(): string {
+export function createSessionCookie(secure: boolean): string {
   const exp = Date.now() + MAX_AGE_SECONDS * 1000;
   const payload = String(exp);
   const signature = sign(payload);
   const token = `${payload}.${signature}`;
-  return `${COOKIE_NAME}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${MAX_AGE_SECONDS}`;
+  const secureAttr = secure ? " Secure;" : "";
+  return `${COOKIE_NAME}=${token}; Path=/; HttpOnly;${secureAttr} SameSite=Lax; Max-Age=${MAX_AGE_SECONDS}`;
 }
 
-export function clearSessionCookie(): string {
-  return `${COOKIE_NAME}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
+export function clearSessionCookie(secure: boolean): string {
+  const secureAttr = secure ? " Secure;" : "";
+  return `${COOKIE_NAME}=; Path=/; HttpOnly;${secureAttr} SameSite=Lax; Max-Age=0`;
 }
 
 function parseCookies(header: string | undefined): Record<string, string> {

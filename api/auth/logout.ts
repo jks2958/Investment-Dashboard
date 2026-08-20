@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import { clearSessionCookie } from "../../lib/server/session";
+import { clearSessionCookie, isHttpsRequest } from "../../lib/server/session";
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
@@ -8,6 +8,6 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  res.setHeader("Set-Cookie", clearSessionCookie());
+  res.setHeader("Set-Cookie", clearSessionCookie(isHttpsRequest(req)));
   res.status(200).json({ ok: true });
 }
