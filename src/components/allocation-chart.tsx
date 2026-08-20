@@ -3,16 +3,17 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { formatCurrency } from "@/lib/format";
 
 export type AllocationSlice = {
-  key: "stock" | "fund" | "crypto" | "cash";
+  key: "stock" | "fund" | "crypto" | "cash" | "other";
   label: string;
   value: number;
 };
 
 const COLOR_VAR: Record<AllocationSlice["key"], string> = {
-  stock: "var(--chart-stock)",
-  fund: "var(--chart-fund)",
-  crypto: "var(--chart-crypto)",
-  cash: "var(--chart-cash)",
+  stock: "var(--trend-stock)",
+  fund: "var(--trend-fund)",
+  crypto: "var(--trend-crypto)",
+  cash: "var(--trend-cash)",
+  other: "var(--trend-other)",
 };
 
 export function AllocationChart({ data }: { data: AllocationSlice[] }) {

@@ -1,13 +1,14 @@
 import { eq } from "drizzle-orm";
 
 import { db } from "../../db/client";
-import { cashAccounts, holdings, priceCache } from "../../db/schema";
+import { cashAccounts, holdings, otherAssets, priceCache } from "../../db/schema";
 
 export type AssetTypeValues = {
   stock: number;
   fund: number;
   crypto: number;
   cash: number;
+  other: number;
   totalInvested: number;
 };
 
@@ -22,7 +23,14 @@ export async function computeAssetTypeValues(): Promise<AssetTypeValues> {
     .from(holdings)
     .leftJoin(priceCache, eq(holdings.symbol, priceCache.symbol));
 
-  const values: AssetTypeValues = { stock: 0, fund: 0, crypto: 0, cash: 0, totalInvested: 0 };
+  const values: AssetTypeValues = {
+    stock: 0,
+    fund: 0,
+    crypto: 0,
+    cash: 0,
+    other: 0,
+    totalInvested: 0,
+  };
 
   for (const row of rows) {
     const quantity = Number(row.quantity);
@@ -35,6 +43,9 @@ export async function computeAssetTypeValues(): Promise<AssetTypeValues> {
 
   const cash = await db.select({ balance: cashAccounts.balance }).from(cashAccounts);
   values.cash = cash.reduce((sum, c) => sum + Number(c.balance), 0);
+
+  const other = await db.select({ value: otherAssets.value }).from(otherAssets);
+  values.other = other.reduce((sum, o) => sum + Number(o.value), 0);
 
   return values;
 }

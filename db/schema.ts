@@ -27,6 +27,13 @@ export const cashAccounts = pgTable("cash_accounts", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const otherAssets = pgTable("other_assets", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: text("name").notNull(),
+  value: numeric("value", { precision: 18, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const holdings = pgTable("holdings", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   symbol: text("symbol").notNull(),
@@ -73,6 +80,7 @@ export const netWorthSnapshots = pgTable("net_worth_snapshots", {
   stockValue: numeric("stock_value", { precision: 18, scale: 2 }).notNull(),
   fundValue: numeric("fund_value", { precision: 18, scale: 2 }).notNull(),
   cryptoValue: numeric("crypto_value", { precision: 18, scale: 2 }).notNull(),
+  otherValue: numeric("other_value", { precision: 18, scale: 2 }).notNull().default("0"),
   totalInvested: numeric("total_invested", {
     precision: 18,
     scale: 2,

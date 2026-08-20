@@ -14,14 +14,15 @@ const ASSET_TYPE_LABEL: Record<AllocationSlice["key"], string> = {
   fund: "Funds",
   crypto: "Crypto",
   cash: "Cash",
+  other: "Other Assets",
 };
 
 export function DashboardPage() {
-  const { isLoading, totalAssets, totalCash, holdingsValue, valueByType, seriesFor } =
+  const { isLoading, totalAssets, totalCash, totalOther, holdingsValue, valueByType, seriesFor } =
     usePortfolioTotals();
 
   const allocation: AllocationSlice[] = (
-    ["stock", "fund", "crypto", "cash"] as const
+    ["stock", "fund", "crypto", "cash", "other"] as const
   ).map((key) => ({ key, label: ASSET_TYPE_LABEL[key], value: valueByType[key] }));
 
   function delta(current: number, key: "stock" | "fund" | "crypto" | "cash") {
@@ -39,12 +40,17 @@ export function DashboardPage() {
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <HeroAssetsCard
-            totalAssets={totalAssets}
-            cashValue={totalCash}
-            investmentsValue={holdingsValue}
-          />
-          <NetIncomeCard />
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-stretch">
+            <HeroAssetsCard
+              totalAssets={totalAssets}
+              cashValue={totalCash}
+              investmentsValue={holdingsValue}
+              otherValue={totalOther}
+            />
+            <div className="flex-1">
+              <NetIncomeCard />
+            </div>
+          </div>
           <ExpensesCard />
         </div>
 

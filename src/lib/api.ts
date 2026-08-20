@@ -82,6 +82,18 @@ export type WishlistInput = {
   note?: string;
 };
 
+export type OtherAsset = {
+  id: number;
+  name: string;
+  value: string;
+  createdAt: string;
+};
+
+export type OtherAssetInput = {
+  name: string;
+  value: number;
+};
+
 export type NetWorthSnapshot = {
   id: number;
   snapshotDate: string;
@@ -89,6 +101,7 @@ export type NetWorthSnapshot = {
   stockValue: string;
   fundValue: string;
   cryptoValue: string;
+  otherValue: string;
   totalInvested: string;
 };
 
@@ -118,6 +131,13 @@ export const api = {
     create: (input: CashInput) =>
       request<CashAccount>("/api/cash", { method: "POST", body: JSON.stringify(input) }),
     remove: (id: number) => request<void>(`/api/cash/${id}`, { method: "DELETE" }),
+  },
+
+  otherAssets: {
+    list: () => request<OtherAsset[]>("/api/other-assets"),
+    create: (input: OtherAssetInput) =>
+      request<OtherAsset>("/api/other-assets", { method: "POST", body: JSON.stringify(input) }),
+    remove: (id: number) => request<void>(`/api/other-assets/${id}`, { method: "DELETE" }),
   },
 
   transactions: {

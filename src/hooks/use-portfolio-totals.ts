@@ -1,9 +1,10 @@
 import { useCashAccounts } from "@/hooks/use-cash";
 import { useHoldings } from "@/hooks/use-holdings";
+import { useOtherAssets } from "@/hooks/use-other-assets";
 import { useSnapshots } from "@/hooks/use-snapshots";
 import type { AssetType } from "@/lib/api";
 
-export type AssetTypeKey = AssetType | "cash";
+export type AssetTypeKey = AssetType | "cash" | "other";
 
 function percentDelta(current: number, previous: number): number | undefined {
   if (previous <= 0) return undefined;
@@ -13,15 +14,18 @@ function percentDelta(current: number, previous: number): number | undefined {
 export function usePortfolioTotals() {
   const { data: holdings, isLoading: holdingsLoading } = useHoldings();
   const { data: cashAccounts, isLoading: cashLoading } = useCashAccounts();
+  const { data: otherAssets, isLoading: otherLoading } = useOtherAssets();
   const { data: snapshots } = useSnapshots();
 
   const totalCash = (cashAccounts ?? []).reduce((sum, a) => sum + Number(a.balance), 0);
+  const totalOther = (otherAssets ?? []).reduce((sum, a) => sum + Number(a.value), 0);
 
   const valueByType: Record<AssetTypeKey, number> = {
     stock: 0,
     fund: 0,
     crypto: 0,
     cash: totalCash,
+    other: totalOther,
   };
   for (const h of holdings ?? []) {
     const quantity = Number(h.quantity);
@@ -34,7 +38,7 @@ export function usePortfolioTotals() {
     (sum, h) => sum + Number(h.quantity) * Number(h.avgCostBasis),
     0,
   );
-  const totalAssets = holdingsValue + totalCash;
+  const totalAssets = holdingsValue + totalCash + totalOther;
   const gainPct = totalInvested > 0 ? ((holdingsValue - totalInvested) / totalInvested) * 100 : undefined;
 
   const oldestSnapshot = snapshots?.[0];
@@ -44,7 +48,8 @@ export function usePortfolioTotals() {
         Number(oldestSnapshot.cashValue) +
           Number(oldestSnapshot.stockValue) +
           Number(oldestSnapshot.fundValue) +
-          Number(oldestSnapshot.cryptoValue),
+          Number(oldestSnapshot.cryptoValue) +
+          Number(oldestSnapshot.otherValue),
       )
     : undefined;
 
@@ -59,16 +64,19 @@ export function usePortfolioTotals() {
           return Number(s.cryptoValue);
         case "cash":
           return Number(s.cashValue);
+        case "other":
+          return Number(s.otherValue);
       }
     });
     return [...history, currentValue];
   }
 
   return {
-    isLoading: holdingsLoading || cashLoading,
+    isLoading: holdingsLoading || cashLoading || otherLoading,
     totalAssets,
     totalInvested,
     totalCash,
+    totalOther,
     holdingsValue,
     gainPct,
     netWorthDeltaPct,

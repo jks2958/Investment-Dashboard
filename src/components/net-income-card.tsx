@@ -37,7 +37,7 @@ export function NetIncomeCard() {
   });
 
   return (
-    <Card className="gap-3">
+    <Card className="h-full justify-between gap-3">
       <div className="flex items-start justify-between">
         <p className="text-sm font-medium text-muted-foreground">Net Income / month</p>
         <span className="flex size-8 items-center justify-center rounded-full bg-accent text-muted-foreground">
@@ -69,7 +69,7 @@ export function NetIncomeCard() {
             )}
           </div>
         </div>
-        <div className="w-32">
+        <div className="w-24 flex-1 sm:w-auto">
           <Sparkline data={series} color="var(--positive)" id="net-income" />
         </div>
       </div>

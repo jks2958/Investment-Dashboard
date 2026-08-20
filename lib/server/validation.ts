@@ -38,6 +38,13 @@ export const cashInsertSchema = z.object({
 
 export const cashUpdateSchema = cashInsertSchema.partial();
 
+export const otherAssetInsertSchema = z.object({
+  name: z.string().trim().min(1).max(60),
+  value: z.coerce.number().nonnegative(),
+});
+
+export const otherAssetUpdateSchema = otherAssetInsertSchema.partial();
+
 export const transactionInsertSchema = z.object({
   type: z.enum(["income", "expense"]),
   category: z.string().trim().min(1).max(40),

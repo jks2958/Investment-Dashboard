@@ -1,7 +1,9 @@
 import * as React from "react";
 
 import { AddCashDialog } from "@/components/add-cash-dialog";
+import { AddOtherAssetDialog } from "@/components/add-other-asset-dialog";
 import { CashList } from "@/components/cash-list";
+import { OtherAssetsList } from "@/components/other-assets-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -51,6 +53,16 @@ export function AccountPage() {
         </CardHeader>
         <CardContent>
           <CashList />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <h2 className="text-base font-semibold">Other assets</h2>
+          <AddOtherAssetDialog />
+        </CardHeader>
+        <CardContent>
+          <OtherAssetsList />
         </CardContent>
       </Card>
     </div>

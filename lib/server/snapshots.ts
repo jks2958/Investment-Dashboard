@@ -19,6 +19,7 @@ export async function recordTodaySnapshot(): Promise<void> {
       stockValue: String(values.stock),
       fundValue: String(values.fund),
       cryptoValue: String(values.crypto),
+      otherValue: String(values.other),
       totalInvested: String(values.totalInvested),
     })
     .onConflictDoUpdate({
@@ -28,6 +29,7 @@ export async function recordTodaySnapshot(): Promise<void> {
         stockValue: String(values.stock),
         fundValue: String(values.fund),
         cryptoValue: String(values.crypto),
+        otherValue: String(values.other),
         totalInvested: String(values.totalInvested),
       },
     });
