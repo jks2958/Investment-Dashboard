@@ -41,6 +41,7 @@ export function AllocationChart({ data }: { data: AllocationSlice[] }) {
               paddingAngle={2}
               stroke="var(--card)"
               strokeWidth={2}
+              isAnimationActive={false}
             >
               {slices.map((slice) => (
                 <Cell key={slice.key} fill={COLOR_VAR[slice.key]} />

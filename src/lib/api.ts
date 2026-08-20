@@ -46,6 +46,52 @@ export type CashInput = {
   balance: number;
 };
 
+export type TransactionType = "income" | "expense";
+
+export type Transaction = {
+  id: number;
+  type: TransactionType;
+  category: string;
+  amount: string;
+  occurredOn: string;
+  note: string | null;
+  createdAt: string;
+};
+
+export type TransactionInput = {
+  type: TransactionType;
+  category: string;
+  amount: number;
+  occurredOn: string;
+  note?: string;
+};
+
+export type WishlistItem = {
+  id: number;
+  symbol: string;
+  assetType: AssetType;
+  targetPrice: string | null;
+  note: string | null;
+  createdAt: string;
+};
+
+export type WishlistInput = {
+  symbol: string;
+  assetType: AssetType;
+  targetPrice?: number;
+  note?: string;
+};
+
+export type NetWorthSnapshot = {
+  id: number;
+  snapshotDate: string;
+  cashValue: string;
+  stockValue: string;
+  fundValue: string;
+  cryptoValue: string;
+  totalInvested: string;
+};
+
 export const api = {
   session: () => request<{ authenticated: boolean }>("/api/auth/session"),
   login: (passphrase: string) =>
@@ -54,6 +100,11 @@ export const api = {
       body: JSON.stringify({ passphrase }),
     }),
   logout: () => request<{ ok: true }>("/api/auth/logout", { method: "POST" }),
+  changePassphrase: (currentPassphrase: string, newPassphrase: string) =>
+    request<{ ok: true }>("/api/auth/change-passphrase", {
+      method: "POST",
+      body: JSON.stringify({ currentPassphrase, newPassphrase }),
+    }),
 
   holdings: {
     list: () => request<Holding[]>("/api/holdings"),
@@ -67,5 +118,29 @@ export const api = {
     create: (input: CashInput) =>
       request<CashAccount>("/api/cash", { method: "POST", body: JSON.stringify(input) }),
     remove: (id: number) => request<void>(`/api/cash/${id}`, { method: "DELETE" }),
+  },
+
+  transactions: {
+    list: () => request<Transaction[]>("/api/transactions"),
+    create: (input: TransactionInput) =>
+      request<Transaction>("/api/transactions", { method: "POST", body: JSON.stringify(input) }),
+    remove: (id: number) => request<void>(`/api/transactions/${id}`, { method: "DELETE" }),
+  },
+
+  wishlist: {
+    list: () => request<WishlistItem[]>("/api/wishlist"),
+    create: (input: WishlistInput) =>
+      request<WishlistItem>("/api/wishlist", { method: "POST", body: JSON.stringify(input) }),
+    remove: (id: number) => request<void>(`/api/wishlist/${id}`, { method: "DELETE" }),
+  },
+
+  profile: {
+    get: () => request<{ name: string }>("/api/profile"),
+    update: (name: string) =>
+      request<{ name: string }>("/api/profile", { method: "PATCH", body: JSON.stringify({ name }) }),
+  },
+
+  snapshots: {
+    list: () => request<NetWorthSnapshot[]>("/api/snapshots"),
   },
 };

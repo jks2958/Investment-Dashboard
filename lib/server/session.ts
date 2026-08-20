@@ -1,6 +1,10 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
+import { db } from "../../db/client";
+import { authConfig } from "../../db/schema";
+
 const COOKIE_NAME = "session";
+const AUTH_CONFIG_ID = 1;
 const MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
 
 function getSecret(): string {
@@ -58,11 +62,43 @@ export function isSessionValid(cookieHeader: string | undefined): boolean {
   return true;
 }
 
-export function verifyPassphrase(candidate: string): boolean {
-  const expected = process.env.AUTH_PASSPHRASE;
-  if (!expected) throw new Error("AUTH_PASSPHRASE is not set");
+function hashPassphrase(value: string): string {
+  return createHmac("sha256", getSecret()).update(value).digest("base64url");
+}
 
-  const a = createHmac("sha256", getSecret()).update(candidate).digest();
-  const b = createHmac("sha256", getSecret()).update(expected).digest();
-  return timingSafeEqual(a, b);
+async function getPassphraseHash(): Promise<string> {
+  const [row] = await db
+    .select({ passphraseHash: authConfig.passphraseHash })
+    .from(authConfig)
+    .limit(1);
+
+  if (row) return row.passphraseHash;
+
+  const seed = process.env.AUTH_PASSPHRASE;
+  if (!seed) throw new Error("AUTH_PASSPHRASE is not set");
+
+  const hash = hashPassphrase(seed);
+  await db
+    .insert(authConfig)
+    .values({ id: AUTH_CONFIG_ID, passphraseHash: hash })
+    .onConflictDoNothing();
+  return hash;
+}
+
+export async function verifyPassphrase(candidate: string): Promise<boolean> {
+  const expected = await getPassphraseHash();
+  const a = Buffer.from(hashPassphrase(candidate));
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+export async function changePassphrase(next: string): Promise<void> {
+  const hash = hashPassphrase(next);
+  await db
+    .insert(authConfig)
+    .values({ id: AUTH_CONFIG_ID, passphraseHash: hash, updatedAt: new Date() })
+    .onConflictDoUpdate({
+      target: authConfig.id,
+      set: { passphraseHash: hash, updatedAt: new Date() },
+    });
 }

@@ -1,16 +1,13 @@
-import { AddCashDialog } from "@/components/add-cash-dialog";
-import { AddHoldingDialog } from "@/components/add-holding-dialog";
+import { Bitcoin, Landmark, Layers, TrendingUp, Wallet } from "lucide-react";
+import { Link } from "wouter";
+
 import { AllocationChart, type AllocationSlice } from "@/components/allocation-chart";
-import { CashList } from "@/components/cash-list";
-import { HoldingsList } from "@/components/holdings-list";
-import { StatCard } from "@/components/stat-card";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { useCashAccounts } from "@/hooks/use-cash";
-import { useHoldings } from "@/hooks/use-holdings";
-import { useAuth } from "@/lib/auth";
-import { formatCurrency } from "@/lib/format";
+import { ExpensesCard } from "@/components/expenses-card";
+import { HeroAssetsCard } from "@/components/hero-assets-card";
+import { MiniStatCard } from "@/components/mini-stat-card";
+import { NetIncomeCard } from "@/components/net-income-card";
+import { Card } from "@/components/ui/card";
+import { usePortfolioTotals } from "@/hooks/use-portfolio-totals";
 
 const ASSET_TYPE_LABEL: Record<AllocationSlice["key"], string> = {
   stock: "Stocks",
@@ -20,93 +17,88 @@ const ASSET_TYPE_LABEL: Record<AllocationSlice["key"], string> = {
 };
 
 export function DashboardPage() {
-  const { logout } = useAuth();
-  const { data: holdings } = useHoldings();
-  const { data: cashAccounts } = useCashAccounts();
+  const { isLoading, totalAssets, totalCash, holdingsValue, valueByType, seriesFor } =
+    usePortfolioTotals();
 
-  const totalCash = (cashAccounts ?? []).reduce((sum, a) => sum + Number(a.balance), 0);
-
-  const holdingsValue = (holdings ?? []).reduce((sum, h) => {
-    const quantity = Number(h.quantity);
-    const price = h.lastPrice !== null ? Number(h.lastPrice) : Number(h.avgCostBasis);
-    return sum + quantity * price;
-  }, 0);
-
-  const totalInvested = (holdings ?? []).reduce(
-    (sum, h) => sum + Number(h.quantity) * Number(h.avgCostBasis),
-    0,
-  );
-
-  const totalAssets = holdingsValue + totalCash;
-  const gainPct = totalInvested > 0 ? ((holdingsValue - totalInvested) / totalInvested) * 100 : 0;
-
-  const valueByType: Record<AllocationSlice["key"], number> = {
-    stock: 0,
-    fund: 0,
-    crypto: 0,
-    cash: totalCash,
-  };
-  for (const h of holdings ?? []) {
-    const quantity = Number(h.quantity);
-    const price = h.lastPrice !== null ? Number(h.lastPrice) : Number(h.avgCostBasis);
-    valueByType[h.assetType] += quantity * price;
-  }
   const allocation: AllocationSlice[] = (
     ["stock", "fund", "crypto", "cash"] as const
   ).map((key) => ({ key, label: ASSET_TYPE_LABEL[key], value: valueByType[key] }));
 
-  return (
-    <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
-      <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Portfolio</h1>
-        <div className="flex items-center gap-1">
-          <ThemeToggle />
-          <Button variant="ghost" size="sm" onClick={() => logout()}>
-            Log out
-          </Button>
-        </div>
-      </header>
+  function delta(current: number, key: "stock" | "fund" | "crypto" | "cash") {
+    const series = seriesFor(key, current);
+    const first = series[0];
+    if (first === undefined || first <= 0) return undefined;
+    return ((current - first) / first) * 100;
+  }
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total assets" value={formatCurrency(totalAssets)} />
-        <StatCard label="Total invested" value={formatCurrency(totalInvested)} />
-        <StatCard label="Cash balance" value={formatCurrency(totalCash)} />
-        <StatCard
-          label="Unrealized gain/loss"
-          value={formatCurrency(holdingsValue - totalInvested)}
-          delta={totalInvested > 0 ? gainPct : undefined}
-        />
+  if (isLoading) {
+    return <p className="py-10 text-center text-sm text-muted-foreground">Loading…</p>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="space-y-4 lg:col-span-2">
+          <HeroAssetsCard
+            totalAssets={totalAssets}
+            cashValue={totalCash}
+            investmentsValue={holdingsValue}
+          />
+          <NetIncomeCard />
+          <ExpensesCard />
+        </div>
+
+        <Card className="lg:row-span-1">
+          <div className="flex items-center gap-2">
+            <span className="flex size-8 items-center justify-center rounded-full bg-positive/15 text-positive">
+              <Wallet className="size-4" />
+            </span>
+            <h2 className="text-base font-semibold">Wealth Distribution</h2>
+          </div>
+          <AllocationChart data={allocation} />
+          <Link href="/stocks" className="text-sm font-medium text-primary hover:underline">
+            View full breakdown →
+          </Link>
+        </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <h2 className="text-base font-semibold">Portfolio allocation</h2>
-        </CardHeader>
-        <CardContent>
-          <AllocationChart data={allocation} />
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <h2 className="text-base font-semibold">Holdings</h2>
-            <AddHoldingDialog />
-          </CardHeader>
-          <CardContent>
-            <HoldingsList />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <h2 className="text-base font-semibold">Cash accounts</h2>
-            <AddCashDialog />
-          </CardHeader>
-          <CardContent>
-            <CashList />
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <MiniStatCard
+          id="cash"
+          label="Cash"
+          value={valueByType.cash}
+          delta={delta(valueByType.cash, "cash")}
+          color="var(--trend-cash)"
+          icon={Landmark}
+          series={seriesFor("cash", valueByType.cash)}
+        />
+        <MiniStatCard
+          id="stocks"
+          label="Stocks"
+          value={valueByType.stock}
+          delta={delta(valueByType.stock, "stock")}
+          color="var(--trend-stock)"
+          icon={TrendingUp}
+          series={seriesFor("stock", valueByType.stock)}
+        />
+        <MiniStatCard
+          id="funds"
+          label="Funds"
+          value={valueByType.fund}
+          delta={delta(valueByType.fund, "fund")}
+          color="var(--trend-fund)"
+          icon={Layers}
+          series={seriesFor("fund", valueByType.fund)}
+        />
+        <MiniStatCard
+          id="crypto"
+          label="Crypto"
+          value={valueByType.crypto}
+          delta={delta(valueByType.crypto, "crypto")}
+          color="var(--trend-crypto)"
+          icon={Bitcoin}
+          series={seriesFor("crypto", valueByType.crypto)}
+        />
       </div>
     </div>
   );

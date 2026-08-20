@@ -26,10 +26,10 @@ const ASSET_TYPES: { value: AssetType; label: string }[] = [
   { value: "crypto", label: "Crypto" },
 ];
 
-export function AddHoldingDialog() {
+export function AddHoldingDialog({ lockType }: { lockType?: AssetType }) {
   const [open, setOpen] = React.useState(false);
   const [symbol, setSymbol] = React.useState("");
-  const [assetType, setAssetType] = React.useState<AssetType>("stock");
+  const [assetType, setAssetType] = React.useState<AssetType>(lockType ?? "stock");
   const [quantity, setQuantity] = React.useState("");
   const [avgCostBasis, setAvgCostBasis] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
@@ -37,7 +37,7 @@ export function AddHoldingDialog() {
 
   function reset() {
     setSymbol("");
-    setAssetType("stock");
+    setAssetType(lockType ?? "stock");
     setQuantity("");
     setAvgCostBasis("");
     setError(null);
@@ -88,21 +88,23 @@ export function AddHoldingDialog() {
               required
             />
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="assetType">Type</Label>
-            <Select value={assetType} onValueChange={(v) => setAssetType(v as AssetType)}>
-              <SelectTrigger id="assetType">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ASSET_TYPES.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {!lockType && (
+            <div className="space-y-1.5">
+              <Label htmlFor="assetType">Type</Label>
+              <Select value={assetType} onValueChange={(v) => setAssetType(v as AssetType)}>
+                <SelectTrigger id="assetType">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ASSET_TYPES.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>
+                      {t.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="quantity">Quantity</Label>

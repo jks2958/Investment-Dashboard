@@ -37,17 +37,22 @@
   --input: oklch(0.9 0.005 285);
   --ring: oklch(0.7 0.16 55);
 
-  --chart-stock: #2a78d6;
-  --chart-fund: #eb6834;
-  --chart-crypto: #1baf7a;
-  --chart-cash: #eda100;
+  --chart-stock: #f2ddb0;
+  --chart-fund: #f0913a;
+  --chart-crypto: #f5871f;
+  --chart-cash: #8a5a2e;
+
+  --trend-cash: oklch(0.65 0.16 145);
+  --trend-stock: #2a78d6;
+  --trend-fund: #7c5cd6;
+  --trend-crypto: #eda100;
 }
 
 .dark {
-  --background: oklch(0.16 0.012 275);
+  --background: oklch(0.135 0.008 270);
   --foreground: oklch(0.95 0.005 285);
 
-  --card: oklch(0.2 0.012 275);
+  --card: oklch(0.175 0.01 270);
   --card-foreground: oklch(0.95 0.005 285);
 
   --popover: oklch(0.2 0.012 275);
@@ -75,10 +80,15 @@
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.74 0.17 55);
 
-  --chart-stock: #3987e5;
-  --chart-fund: #d95926;
-  --chart-crypto: #199e70;
-  --chart-cash: #c98500;
+  --chart-stock: #e8cf9c;
+  --chart-fund: #e2812c;
+  --chart-crypto: #ff9b3d;
+  --chart-cash: #a97a45;
+
+  --trend-cash: oklch(0.7 0.15 145);
+  --trend-stock: #3987e5;
+  --trend-fund: #9c85e9;
+  --trend-crypto: #c98500;
 }
 
 @theme inline {
@@ -108,6 +118,11 @@
   --color-chart-fund: var(--chart-fund);
   --color-chart-crypto: var(--chart-crypto);
   --color-chart-cash: var(--chart-cash);
+
+  --color-trend-cash: var(--trend-cash);
+  --color-trend-stock: var(--trend-stock);
+  --color-trend-fund: var(--trend-fund);
+  --color-trend-crypto: var(--trend-crypto);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

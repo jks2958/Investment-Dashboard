@@ -2,6 +2,7 @@ import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useDeleteHolding, useHoldings } from "@/hooks/use-holdings";
+import type { AssetType } from "@/lib/api";
 import { formatCurrency, formatPercent } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -11,9 +12,13 @@ const ASSET_TYPE_LABEL: Record<string, string> = {
   crypto: "Crypto",
 };
 
-export function HoldingsList() {
-  const { data: holdings, isLoading } = useHoldings();
+export function HoldingsList({ filterType }: { filterType?: AssetType }) {
+  const { data: allHoldings, isLoading } = useHoldings();
   const deleteHolding = useDeleteHolding();
+
+  const holdings = filterType
+    ? allHoldings?.filter((h) => h.assetType === filterType)
+    : allHoldings;
 
   if (isLoading) {
     return <p className="text-sm text-muted-foreground">Loading…</p>;
