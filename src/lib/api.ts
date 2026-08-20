@@ -94,6 +94,47 @@ export type OtherAssetInput = {
   value: number;
 };
 
+export type WidgetType =
+  | "total-assets"
+  | "net-income"
+  | "expenses"
+  | "allocation"
+  | "mini-cash"
+  | "mini-stocks"
+  | "mini-funds"
+  | "mini-crypto"
+  | "cash-accounts"
+  | "other-assets"
+  | "wishlist"
+  | "transactions"
+  | "holdings-stocks"
+  | "holdings-funds"
+  | "holdings-crypto";
+
+export type WidgetLayoutItem = {
+  i: string;
+  type: WidgetType;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+export type Accent = "orange" | "blue" | "emerald" | "violet" | "rose";
+
+export type DashboardSettings = {
+  layoutLg: WidgetLayoutItem[];
+  layoutMd: WidgetLayoutItem[];
+  accent: Accent;
+};
+
+export type DashboardSettingsUpdate = {
+  layoutLg?: WidgetLayoutItem[];
+  layoutMd?: WidgetLayoutItem[];
+  accent?: Accent;
+  reset?: boolean;
+};
+
 export type NetWorthSnapshot = {
   id: number;
   snapshotDate: string;
@@ -162,5 +203,14 @@ export const api = {
 
   snapshots: {
     list: () => request<NetWorthSnapshot[]>("/api/snapshots"),
+  },
+
+  dashboardSettings: {
+    get: () => request<DashboardSettings>("/api/dashboard-settings"),
+    update: (input: DashboardSettingsUpdate) =>
+      request<DashboardSettings>("/api/dashboard-settings", {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      }),
   },
 };

@@ -37,7 +37,7 @@ export function NetIncomeCard() {
   });
 
   return (
-    <Card className="h-full justify-between gap-3">
+    <Card className="h-full justify-between gap-3 overflow-auto">
       <div className="flex items-start justify-between">
         <p className="text-sm font-medium text-muted-foreground">Net Income / month</p>
         <span className="flex size-8 items-center justify-center rounded-full bg-accent text-muted-foreground">

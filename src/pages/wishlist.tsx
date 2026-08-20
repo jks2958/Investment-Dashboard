@@ -17,7 +17,7 @@ export function WishlistPage() {
   const deleteItem = useDeleteWishlistItem();
 
   return (
-    <Card>
+    <Card className="h-full overflow-auto">
       <CardHeader>
         <h2 className="text-base font-semibold">Wishlist</h2>
         <AddWishlistDialog />

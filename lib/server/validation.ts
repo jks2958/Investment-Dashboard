@@ -68,3 +68,39 @@ export const wishlistInsertSchema = z
 export const profileUpdateSchema = z.object({
   name: z.string().trim().min(1).max(60),
 });
+
+export const widgetTypeSchema = z.enum([
+  "total-assets",
+  "net-income",
+  "expenses",
+  "allocation",
+  "mini-cash",
+  "mini-stocks",
+  "mini-funds",
+  "mini-crypto",
+  "cash-accounts",
+  "other-assets",
+  "wishlist",
+  "transactions",
+  "holdings-stocks",
+  "holdings-funds",
+  "holdings-crypto",
+]);
+
+export const widgetLayoutItemSchema = z.object({
+  i: z.string().min(1).max(80),
+  type: widgetTypeSchema,
+  x: z.coerce.number().int().min(0),
+  y: z.coerce.number().int().min(0),
+  w: z.coerce.number().int().min(1),
+  h: z.coerce.number().int().min(1),
+});
+
+export const accentSchema = z.enum(["orange", "blue", "emerald", "violet", "rose"]);
+
+export const dashboardSettingsUpdateSchema = z.object({
+  layoutLg: z.array(widgetLayoutItemSchema).max(60).optional(),
+  layoutMd: z.array(widgetLayoutItemSchema).max(60).optional(),
+  accent: accentSchema.optional(),
+  reset: z.boolean().optional(),
+});

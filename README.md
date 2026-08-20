@@ -42,14 +42,34 @@ To deploy: import the repo into Vercel, set the same env vars there, and connect
 
 ## Pages
 
-- **Dashboard** — Total Assets hero card, Net Income/month, Expenses (with
-  category breakdown), Wealth Distribution donut, and mini Cash/Stocks/Funds/
-  Crypto cards with sparklines. Read-only overview.
+- **Dashboard** — a fully customizable widget grid (see below). Default
+  widgets: Total Assets hero card, Net Income/month, Expenses (with category
+  breakdown), Wealth Distribution donut, and mini Cash/Stocks/Funds/Crypto
+  cards with sparklines.
 - **Stocks Portfolio**, **Other Investments → Funds / Crypto** — holdings CRUD, filtered by type.
 - **Income / Expense** — transaction log (income/expense with category), monthly summary.
 - **Wishlist** — symbols you're watching, with an optional target price.
-- **Account** — display name, cash accounts CRUD.
-- **Settings** — theme (light/dark), change passphrase.
+- **Account** — display name, cash accounts CRUD, other assets CRUD.
+- **Settings** — theme (light/dark), accent color preset, change passphrase.
+
+## Customizable dashboard
+
+Click **Customize** on the Dashboard to enter edit mode (desktop and tablet
+only — mobile stays a fixed single-column view, since drag/resize doesn't
+translate to touch-sized screens):
+
+- **Drag** any widget by its grip handle to reposition it.
+- **Resize** by dragging its bottom-right corner.
+- **Add widget** opens a palette of all available widget types (stat cards,
+  charts, list previews, per-type holdings lists) — add as many as you like,
+  duplicates included.
+- **Remove** a widget with its × button.
+- **Reset to default** restores the original layout.
+
+Layout is stored per breakpoint (desktop/tablet) in the `dashboard_settings`
+table and applies across devices. Widget types live in
+`src/lib/widget-registry.tsx` — add an entry there (plus a self-contained
+component under `src/widgets/`) to make a new widget available in the palette.
 
 Sparklines and the "vs last month" deltas are driven by a daily
 `net_worth_snapshots` table that self-records on each dashboard load — history
@@ -58,17 +78,20 @@ accumulates the more the app is used; there's no synthetic backfill.
 ## Where things live
 
 - `src/pages` — top-level routes
-- `src/components` — dashboard UI (cards, charts, lists, add/edit dialogs)
+- `src/components` — dashboard UI (cards, charts, lists, add/edit dialogs, the widget grid)
 - `src/components/app-shell` — sidebar, header, mobile nav drawer
 - `src/components/ui` — shadcn/ui primitives
-- `src/hooks` — TanStack Query hooks (holdings, cash, transactions, wishlist, profile, snapshots)
+- `src/widgets` — self-contained dashboard widget components (each fetches its own data)
+- `src/lib/widget-registry.tsx` — widget type → component/default-size registry
+- `src/hooks` — TanStack Query hooks (holdings, cash, other assets, transactions, wishlist, profile, snapshots, dashboard settings)
 - `src/lib` — auth context, theme, query client, API client, formatting, category icons
-- `api/` — Vercel serverless functions (holdings, cash, transactions, wishlist, profile, snapshots, prices, auth)
+- `api/` — Vercel serverless functions (holdings, cash, other-assets, transactions, wishlist, profile, snapshots, prices, dashboard-settings, auth)
 - `lib/server` — session/auth helpers, market data fetchers, portfolio value math, zod validation
 - `db/` — Drizzle schema, DB client, migrations
 
 ## Status
 
 Fully implemented per the current design: passphrase auth (DB-backed,
-changeable), holdings/cash/transactions/wishlist CRUD, cached market data,
-and the full sidebar dashboard UI with historical sparklines.
+changeable), holdings/cash/other-assets/transactions/wishlist CRUD, cached
+market data, a customizable widget-grid dashboard, accent theming, and
+historical sparklines.

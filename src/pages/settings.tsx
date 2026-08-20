@@ -1,15 +1,27 @@
 import * as React from "react";
-import { Moon, Sun } from "lucide-react";
+import { Check, Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { api } from "@/lib/api";
+import { useDashboardSettings, useUpdateDashboardSettings } from "@/hooks/use-dashboard-settings";
+import { api, type Accent } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/theme";
+
+const ACCENT_PRESETS: { value: Accent; label: string; swatch: string }[] = [
+  { value: "orange", label: "Orange", swatch: "oklch(0.7 0.16 55)" },
+  { value: "blue", label: "Blue", swatch: "oklch(0.7 0.16 250)" },
+  { value: "emerald", label: "Emerald", swatch: "oklch(0.7 0.16 150)" },
+  { value: "violet", label: "Violet", swatch: "oklch(0.7 0.16 300)" },
+  { value: "rose", label: "Rose", swatch: "oklch(0.7 0.16 350)" },
+];
 
 export function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const { data: dashboardSettings } = useDashboardSettings();
+  const updateDashboardSettings = useUpdateDashboardSettings();
   const [currentPassphrase, setCurrentPassphrase] = React.useState("");
   const [newPassphrase, setNewPassphrase] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
@@ -55,6 +67,27 @@ export function SettingsPage() {
             >
               <Moon className="size-4" /> Dark
             </Button>
+          </div>
+
+          <div className="mt-4 flex items-center gap-3">
+            {ACCENT_PRESETS.map((preset) => (
+              <button
+                key={preset.value}
+                type="button"
+                aria-label={preset.label}
+                title={preset.label}
+                onClick={() => updateDashboardSettings.mutate({ accent: preset.value })}
+                className={cn(
+                  "flex size-8 items-center justify-center rounded-full ring-2 ring-offset-2 ring-offset-background transition-shadow",
+                  dashboardSettings?.accent === preset.value ? "ring-foreground" : "ring-transparent",
+                )}
+                style={{ backgroundColor: preset.swatch }}
+              >
+                {dashboardSettings?.accent === preset.value && (
+                  <Check className="size-4 text-white" />
+                )}
+              </button>
+            ))}
           </div>
         </CardContent>
       </Card>

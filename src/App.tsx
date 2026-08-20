@@ -1,8 +1,10 @@
 import { QueryClientProvider } from "@tanstack/react-query";
+import * as React from "react";
 import { Route, Switch, useLocation } from "wouter";
 
 import { AppShell } from "@/components/app-shell/app-shell";
 import { PassphraseGate } from "@/components/passphrase-gate";
+import { useDashboardSettings } from "@/hooks/use-dashboard-settings";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { queryClient } from "@/lib/queryClient";
 import { ThemeProvider } from "@/lib/theme";
@@ -26,6 +28,16 @@ const TITLES: Record<string, string> = {
   "/settings": "Settings",
 };
 
+function AccentSync() {
+  const { data: settings } = useDashboardSettings();
+
+  React.useEffect(() => {
+    if (settings?.accent) document.documentElement.dataset.accent = settings.accent;
+  }, [settings?.accent]);
+
+  return null;
+}
+
 function Gated() {
   const { status } = useAuth();
   const [location] = useLocation();
@@ -35,6 +47,7 @@ function Gated() {
 
   return (
     <AppShell title={TITLES[location] ?? "Dashboard"}>
+      <AccentSync />
       <Switch>
         <Route path="/" component={DashboardPage} />
         <Route path="/stocks" component={StocksPage} />

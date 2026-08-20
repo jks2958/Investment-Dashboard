@@ -5,8 +5,18 @@ import {
   numeric,
   timestamp,
   date,
+  jsonb,
   pgEnum,
 } from "drizzle-orm/pg-core";
+
+export type WidgetLayoutItem = {
+  i: string;
+  type: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
 
 export const assetTypeEnum = pgEnum("asset_type", [
   "stock",
@@ -97,5 +107,13 @@ export const profile = pgTable("profile", {
 export const authConfig = pgTable("auth_config", {
   id: integer("id").primaryKey(),
   passphraseHash: text("passphrase_hash").notNull(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const dashboardSettings = pgTable("dashboard_settings", {
+  id: integer("id").primaryKey(),
+  layoutLg: jsonb("layout_lg").$type<WidgetLayoutItem[]>().notNull(),
+  layoutMd: jsonb("layout_md").$type<WidgetLayoutItem[]>().notNull(),
+  accent: text("accent").notNull().default("orange"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

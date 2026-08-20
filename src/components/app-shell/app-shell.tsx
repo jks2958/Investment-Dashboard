@@ -47,7 +47,7 @@ export function AppShell({ title, children }: { title: string; children: React.R
         </div>
       </div>
 
-      <div className="flex min-w-0 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-center gap-2 p-4 pb-0 md:hidden">
           <button
             type="button"

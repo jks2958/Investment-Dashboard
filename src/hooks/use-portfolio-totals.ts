@@ -71,6 +71,13 @@ export function usePortfolioTotals() {
     return [...history, currentValue];
   }
 
+  function deltaFor(key: AssetTypeKey, currentValue: number): number | undefined {
+    const series = seriesFor(key, currentValue);
+    const first = series[0];
+    if (first === undefined) return undefined;
+    return percentDelta(currentValue, first);
+  }
+
   return {
     isLoading: holdingsLoading || cashLoading || otherLoading,
     totalAssets,
@@ -82,5 +89,6 @@ export function usePortfolioTotals() {
     netWorthDeltaPct,
     valueByType,
     seriesFor,
+    deltaFor,
   };
 }

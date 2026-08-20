@@ -17,7 +17,7 @@ type MiniStatCardProps = {
 
 export function MiniStatCard({ id, label, value, delta, color, icon: Icon, series }: MiniStatCardProps) {
   return (
-    <Card className="gap-3 p-4">
+    <Card className="h-full gap-3 overflow-auto p-4">
       <div className="flex items-center gap-2">
         <span
           className="flex size-8 shrink-0 items-center justify-center rounded-full"

@@ -5,7 +5,7 @@ import type { AssetType } from "@/lib/api";
 
 export function HoldingsByTypePage({ assetType, heading }: { assetType: AssetType; heading: string }) {
   return (
-    <Card>
+    <Card className="h-full overflow-auto">
       <CardHeader>
         <h2 className="text-base font-semibold">{heading}</h2>
         <AddHoldingDialog lockType={assetType} />

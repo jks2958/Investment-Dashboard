@@ -44,7 +44,7 @@ export function ExpensesCard() {
   const rows2 = othersTotal > 0 ? [...top, ["Others", othersTotal] as const] : top;
 
   return (
-    <Card>
+    <Card className="h-full overflow-auto">
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-muted-foreground">Expenses</p>
         <Select value={period} onValueChange={(v) => setPeriod(v as "0" | "-1")}>
