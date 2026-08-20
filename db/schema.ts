@@ -115,5 +115,6 @@ export const dashboardSettings = pgTable("dashboard_settings", {
   layoutLg: jsonb("layout_lg").$type<WidgetLayoutItem[]>().notNull(),
   layoutMd: jsonb("layout_md").$type<WidgetLayoutItem[]>().notNull(),
   accent: text("accent").notNull().default("orange"),
+  cardSkin: text("card_skin").notNull().default("gold"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

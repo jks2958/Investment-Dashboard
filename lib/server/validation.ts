@@ -98,9 +98,12 @@ export const widgetLayoutItemSchema = z.object({
 
 export const accentSchema = z.enum(["orange", "blue", "emerald", "violet", "rose"]);
 
+export const cardSkinSchema = z.enum(["gold", "platinum", "onyx", "sapphire", "rose-gold"]);
+
 export const dashboardSettingsUpdateSchema = z.object({
   layoutLg: z.array(widgetLayoutItemSchema).max(60).optional(),
   layoutMd: z.array(widgetLayoutItemSchema).max(60).optional(),
   accent: accentSchema.optional(),
+  cardSkin: cardSkinSchema.optional(),
   reset: z.boolean().optional(),
 });

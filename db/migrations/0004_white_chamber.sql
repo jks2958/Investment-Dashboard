@@ -1,0 +1,1 @@
+ALTER TABLE "dashboard_settings" ADD COLUMN "card_skin" text DEFAULT 'gold' NOT NULL;

@@ -1,38 +1,48 @@
 import { CreditCard } from "lucide-react";
 
+import { CARD_SKINS, type CardSkin } from "@/lib/card-skins";
 import { formatCurrency } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 export function HeroAssetsCard({
   totalAssets,
   cashValue,
   investmentsValue,
   otherValue = 0,
+  skin = "gold",
 }: {
   totalAssets: number;
   cashValue: number;
   investmentsValue: number;
   otherValue?: number;
+  skin?: CardSkin;
 }) {
   const pct = (value: number) => (totalAssets > 0 ? (value / totalAssets) * 100 : 0);
+  const def = CARD_SKINS[skin];
 
   const stats = [
     { label: "Cash", value: cashValue },
     { label: "Investments", value: investmentsValue },
-    ...(otherValue > 0 ? [{ label: "Other", value: otherValue }] : []),
+    { label: "Other", value: otherValue },
   ];
 
   return (
     <div
-      className="relative aspect-[1.586/1] w-full max-w-sm overflow-hidden rounded-[28px] p-6 text-white shadow-lg [text-shadow:0_1px_3px_rgba(0,0,0,0.35)]"
-      style={{
-        background:
-          "linear-gradient(135deg, var(--gold-from) 0%, var(--gold-via) 45%, var(--gold-to) 100%)",
-      }}
+      className={cn(
+        "relative aspect-[1.586/1] w-full max-w-sm overflow-hidden rounded-[28px] p-6 shadow-lg",
+        def.textClass,
+      )}
+      style={{ background: def.gradient }}
     >
       <div className="flex h-full flex-col justify-between">
         <div className="flex items-start justify-between">
           <p className="text-sm font-medium opacity-90">Total Assets</p>
-          <span className="flex size-9 items-center justify-center rounded-full bg-white/15">
+          <span
+            className={cn(
+              "flex size-9 items-center justify-center rounded-full",
+              def.badgeClass,
+            )}
+          >
             <CreditCard className="size-4.5" />
           </span>
         </div>

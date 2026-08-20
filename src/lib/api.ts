@@ -1,3 +1,5 @@
+import type { CardSkin } from "@/lib/card-skins";
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     ...init,
@@ -126,12 +128,14 @@ export type DashboardSettings = {
   layoutLg: WidgetLayoutItem[];
   layoutMd: WidgetLayoutItem[];
   accent: Accent;
+  cardSkin: CardSkin;
 };
 
 export type DashboardSettingsUpdate = {
   layoutLg?: WidgetLayoutItem[];
   layoutMd?: WidgetLayoutItem[];
   accent?: Accent;
+  cardSkin?: CardSkin;
   reset?: boolean;
 };
 

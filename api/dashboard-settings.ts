@@ -5,6 +5,7 @@ import { db } from "../db/client";
 import { dashboardSettings } from "../db/schema";
 import {
   DEFAULT_ACCENT,
+  DEFAULT_CARD_SKIN,
   DEFAULT_LAYOUT_LG,
   DEFAULT_LAYOUT_MD,
 } from "../lib/server/dashboardDefaults";
@@ -24,6 +25,7 @@ async function getOrCreateSettings() {
       layoutLg: DEFAULT_LAYOUT_LG,
       layoutMd: DEFAULT_LAYOUT_MD,
       accent: DEFAULT_ACCENT,
+      cardSkin: DEFAULT_CARD_SKIN,
     })
     .onConflictDoNothing()
     .returning();
@@ -52,13 +54,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     await getOrCreateSettings();
 
-    const { reset, layoutLg, layoutMd, accent } = parsed.data;
+    const { reset, layoutLg, layoutMd, accent, cardSkin } = parsed.data;
     const updates = reset
       ? { layoutLg: DEFAULT_LAYOUT_LG, layoutMd: DEFAULT_LAYOUT_MD }
       : {
           ...(layoutLg !== undefined ? { layoutLg } : {}),
           ...(layoutMd !== undefined ? { layoutMd } : {}),
           ...(accent !== undefined ? { accent } : {}),
+          ...(cardSkin !== undefined ? { cardSkin } : {}),
         };
 
     const [updated] = await db

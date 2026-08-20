@@ -1,6 +1,7 @@
 import type { WidgetLayoutItem } from "../../db/schema";
 
 export const DEFAULT_ACCENT = "orange";
+export const DEFAULT_CARD_SKIN = "gold";
 
 export const DEFAULT_LAYOUT_LG: WidgetLayoutItem[] = [
   { i: "total-assets", type: "total-assets", x: 0, y: 0, w: 4, h: 6 },

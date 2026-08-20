@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDashboardSettings, useUpdateDashboardSettings } from "@/hooks/use-dashboard-settings";
 import { api, type Accent } from "@/lib/api";
+import { CARD_SKINS, CARD_SKIN_VALUES } from "@/lib/card-skins";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/theme";
 
@@ -88,6 +89,44 @@ export function SettingsPage() {
                 )}
               </button>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <h2 className="text-base font-semibold">Total Assets card style</h2>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-3">
+            {CARD_SKIN_VALUES.map((skin) => {
+              const def = CARD_SKINS[skin];
+              const selected = dashboardSettings?.cardSkin === skin;
+              return (
+                <button
+                  key={skin}
+                  type="button"
+                  onClick={() => updateDashboardSettings.mutate({ cardSkin: skin })}
+                  className={cn(
+                    "relative flex aspect-[1.586/1] w-24 items-end overflow-hidden rounded-lg p-2 ring-2 ring-offset-2 ring-offset-background transition-shadow",
+                    selected ? "ring-foreground" : "ring-transparent",
+                  )}
+                  style={{ background: def.gradient }}
+                >
+                  <span className={cn("text-xs font-medium", def.textClass)}>{def.label}</span>
+                  {selected && (
+                    <span
+                      className={cn(
+                        "absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-full",
+                        def.badgeClass,
+                      )}
+                    >
+                      <Check className={cn("size-3", def.textClass)} />
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
