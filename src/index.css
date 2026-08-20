@@ -46,6 +46,10 @@
   --trend-stock: #2a78d6;
   --trend-fund: #7c5cd6;
   --trend-crypto: #eda100;
+
+  --gold-from: #d9b13d;
+  --gold-via: #f5df9b;
+  --gold-to: #96721a;
 }
 
 .dark {
