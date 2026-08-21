@@ -8,7 +8,7 @@ modeled on a full dashboard UI reference.
 
 - Frontend: React, Vite, TypeScript, Tailwind CSS, shadcn/ui, Recharts, TanStack Query, wouter
 - Backend: Vercel Functions, Neon Postgres, Drizzle ORM
-- Market data: Twelve Data (stocks/ETFs), CoinGecko (crypto), cached server-side
+- Market data: Finnhub (stocks/ETFs), CoinGecko (crypto), cached server-side
 - Auth: single-user passphrase gate (DB-backed, changeable from Settings)
 - Deployment: Vercel
 
@@ -29,7 +29,7 @@ Required env (see `.env.example`):
 - `DATABASE_URL` — Neon Postgres connection string
 - `AUTH_PASSPHRASE` — seeds the passphrase on first run (stored hashed in the DB afterwards; change it from Settings)
 - `AUTH_SESSION_SECRET` — session cookie signing secret
-- `TWELVE_DATA_API_KEY` — stock/ETF price data (free tier: https://twelvedata.com)
+- `FINNHUB_API_KEY` — stock/ETF price data (free tier, no credit card required: https://finnhub.io)
 
 CoinGecko needs no API key for crypto prices.
 
@@ -37,7 +37,7 @@ CoinGecko needs no API key for crypto prices.
 
 1. Create a free Neon Postgres project, copy its connection string into `DATABASE_URL`.
 2. Generate `AUTH_SESSION_SECRET` (e.g. `openssl rand -base64 32`) and pick an `AUTH_PASSPHRASE`.
-3. Get a free Twelve Data API key for `TWELVE_DATA_API_KEY`.
+3. Get a free Finnhub API key for `FINNHUB_API_KEY` (sign up with just an email, no card).
 4. `npm install && npm run db:push` to create the tables.
 5. `vercel dev` (not `npm run dev` — see above), then enter your passphrase to unlock the dashboard.
 6. For crypto holdings/wishlist items, use the CoinGecko coin id as the symbol (e.g. `bitcoin`, `ethereum`), not the ticker.

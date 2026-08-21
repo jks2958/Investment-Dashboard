@@ -4,35 +4,30 @@ import { db } from "../../db/client";
 import { holdings, priceCache } from "../../db/schema";
 
 const STALE_MS = 15 * 60 * 1000;
-const TWELVE_DATA_BASE = "https://api.twelvedata.com";
+const FINNHUB_BASE = "https://finnhub.io/api/v1";
 const COINGECKO_BASE = "https://api.coingecko.com/api/v3";
 
-async function fetchTwelveDataPrices(
+async function fetchFinnhubPrices(
   symbols: string[],
 ): Promise<Map<string, number>> {
-  const apiKey = process.env.TWELVE_DATA_API_KEY;
+  const apiKey = process.env.FINNHUB_API_KEY;
   if (!apiKey || symbols.length === 0) return new Map();
 
-  const url = `${TWELVE_DATA_BASE}/price?symbol=${encodeURIComponent(symbols.join(","))}&apikey=${apiKey}`;
-  const res = await fetch(url);
-  if (!res.ok) return new Map();
-
-  const data = (await res.json()) as
-    | { price?: string }
-    | Record<string, { price?: string }>;
-
   const prices = new Map<string, number>();
-  if (symbols.length === 1) {
-    const price = Number((data as { price?: string }).price);
-    if (Number.isFinite(price)) prices.set(symbols[0], price);
-    return prices;
-  }
 
-  for (const symbol of symbols) {
-    const entry = (data as Record<string, { price?: string }>)[symbol];
-    const price = Number(entry?.price);
-    if (Number.isFinite(price)) prices.set(symbol, price);
-  }
+  // Finnhub's /quote endpoint takes one symbol per request (no batch mode).
+  await Promise.all(
+    symbols.map(async (symbol) => {
+      const url = `${FINNHUB_BASE}/quote?symbol=${encodeURIComponent(symbol)}&token=${apiKey}`;
+      const res = await fetch(url);
+      if (!res.ok) return;
+
+      const data = (await res.json()) as { c?: number };
+      const price = data.c;
+      if (typeof price === "number" && price > 0) prices.set(symbol, price);
+    }),
+  );
+
   return prices;
 }
 
@@ -85,7 +80,7 @@ export async function refreshStalePrices(): Promise<void> {
     .map((r) => r.symbol);
 
   const [stockPrices, cryptoPrices] = await Promise.all([
-    fetchTwelveDataPrices(stockSymbols),
+    fetchFinnhubPrices(stockSymbols),
     fetchCoinGeckoPrices(cryptoSymbols),
   ]);
 
