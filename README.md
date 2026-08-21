@@ -21,8 +21,12 @@ modeled on a full dashboard UI reference.
   actually exercise login, holdings, prices, etc. locally)
 - `npm run build` — typecheck + build for production
 - `npm run typecheck` — typecheck only
-- `npm run db:push` — push DB schema changes (dev only)
-- `npm run db:generate` — generate SQL migrations
+- `npm run db:migrate` — apply committed SQL migrations to the DB (idempotent;
+  this also runs automatically on every Vercel deploy, via `vercel.json`'s
+  build command — no manual step needed once `DATABASE_URL` is set there)
+- `npm run db:push` — dev-only shortcut: push schema changes straight to the
+  DB without generating migration files (handy for local iteration only)
+- `npm run db:generate` — generate SQL migration files from schema changes
 
 Required env (see `.env.example`):
 
@@ -38,11 +42,13 @@ CoinGecko needs no API key for crypto prices.
 1. Create a free Neon Postgres project, copy its connection string into `DATABASE_URL`.
 2. Generate `AUTH_SESSION_SECRET` (e.g. `openssl rand -base64 32`) and pick an `AUTH_PASSPHRASE`.
 3. Get a free Finnhub API key for `FINNHUB_API_KEY` (sign up with just an email, no card).
-4. `npm install && npm run db:push` to create the tables.
+4. Deploying to Vercel with those 4 env vars set is enough — the DB tables
+   are created automatically on deploy (see `db:migrate` above). Working
+   locally instead? Run `npm install && npm run db:migrate`.
 5. `vercel dev` (not `npm run dev` — see above), then enter your passphrase to unlock the dashboard.
 6. For crypto holdings/wishlist items, use the CoinGecko coin id as the symbol (e.g. `bitcoin`, `ethereum`), not the ticker.
 
-To deploy: import the repo into Vercel, set the same env vars there, and connect the same Neon database.
+To deploy: import the repo into Vercel, set the same env vars there, and connect the same Neon database — the schema is created automatically on the first deploy.
 
 ## Pages
 
