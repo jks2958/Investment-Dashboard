@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import { requireAuth } from "../lib/server/requireAuth";
-import { getRecentSnapshots, recordTodaySnapshot } from "../lib/server/snapshots";
+import { requireAuth } from "../lib/server/requireAuth.js";
+import { getRecentSnapshots, recordTodaySnapshot } from "../lib/server/snapshots.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!requireAuth(req, res)) return;

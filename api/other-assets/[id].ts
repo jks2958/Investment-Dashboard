@@ -1,10 +1,10 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { eq } from "drizzle-orm";
 
-import { db } from "../../db/client";
-import { otherAssets } from "../../db/schema";
-import { requireAuth } from "../../lib/server/requireAuth";
-import { otherAssetUpdateSchema } from "../../lib/server/validation";
+import { db } from "../../db/client.js";
+import { otherAssets } from "../../db/schema.js";
+import { requireAuth } from "../../lib/server/requireAuth.js";
+import { otherAssetUpdateSchema } from "../../lib/server/validation.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!requireAuth(req, res)) return;

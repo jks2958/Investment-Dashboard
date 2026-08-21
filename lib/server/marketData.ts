@@ -1,7 +1,7 @@
 import { inArray } from "drizzle-orm";
 
-import { db } from "../../db/client";
-import { holdings, priceCache } from "../../db/schema";
+import { db } from "../../db/client.js";
+import { holdings, priceCache } from "../../db/schema.js";
 
 const STALE_MS = 15 * 60 * 1000;
 const FINNHUB_BASE = "https://finnhub.io/api/v1";

@@ -1,4 +1,4 @@
-import type { WidgetLayoutItem } from "../../db/schema";
+import type { WidgetLayoutItem } from "../../db/schema.js";
 
 export const DEFAULT_ACCENT = "orange";
 export const DEFAULT_CARD_SKIN = "gold";

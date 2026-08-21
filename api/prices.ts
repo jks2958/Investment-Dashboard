@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import { db } from "../db/client";
-import { priceCache } from "../db/schema";
-import { requireAuth } from "../lib/server/requireAuth";
-import { refreshStalePrices } from "../lib/server/marketData";
+import { db } from "../db/client.js";
+import { priceCache } from "../db/schema.js";
+import { requireAuth } from "../lib/server/requireAuth.js";
+import { refreshStalePrices } from "../lib/server/marketData.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!requireAuth(req, res)) return;

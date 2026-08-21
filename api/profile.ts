@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import { db } from "../db/client";
-import { profile } from "../db/schema";
-import { requireAuth } from "../lib/server/requireAuth";
-import { profileUpdateSchema } from "../lib/server/validation";
+import { db } from "../db/client.js";
+import { profile } from "../db/schema.js";
+import { requireAuth } from "../lib/server/requireAuth.js";
+import { profileUpdateSchema } from "../lib/server/validation.js";
 
 const PROFILE_ID = 1;
 const DEFAULT_NAME = "Investor";

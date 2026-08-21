@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
-import { db } from "../../db/client";
-import { cashAccounts, holdings, otherAssets, priceCache } from "../../db/schema";
+import { db } from "../../db/client.js";
+import { cashAccounts, holdings, otherAssets, priceCache } from "../../db/schema.js";
 
 export type AssetTypeValues = {
   stock: number;

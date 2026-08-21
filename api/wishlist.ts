@@ -1,10 +1,10 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { desc } from "drizzle-orm";
 
-import { db } from "../db/client";
-import { wishlistItems } from "../db/schema";
-import { requireAuth } from "../lib/server/requireAuth";
-import { wishlistInsertSchema } from "../lib/server/validation";
+import { db } from "../db/client.js";
+import { wishlistItems } from "../db/schema.js";
+import { requireAuth } from "../lib/server/requireAuth.js";
+import { wishlistInsertSchema } from "../lib/server/validation.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!requireAuth(req, res)) return;

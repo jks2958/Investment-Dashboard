@@ -1,8 +1,8 @@
 import { desc } from "drizzle-orm";
 
-import { db } from "../../db/client";
-import { netWorthSnapshots } from "../../db/schema";
-import { computeAssetTypeValues } from "./portfolioValue";
+import { db } from "../../db/client.js";
+import { netWorthSnapshots } from "../../db/schema.js";
+import { computeAssetTypeValues } from "./portfolioValue.js";
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);

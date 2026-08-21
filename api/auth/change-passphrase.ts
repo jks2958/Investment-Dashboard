@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { z } from "zod";
 
-import { requireAuth } from "../../lib/server/requireAuth";
-import { changePassphrase, verifyPassphrase } from "../../lib/server/session";
+import { requireAuth } from "../../lib/server/requireAuth.js";
+import { changePassphrase, verifyPassphrase } from "../../lib/server/session.js";
 
 const bodySchema = z.object({
   currentPassphrase: z.string().min(1),

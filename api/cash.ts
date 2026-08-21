@@ -1,9 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import { db } from "../db/client";
-import { cashAccounts } from "../db/schema";
-import { requireAuth } from "../lib/server/requireAuth";
-import { cashInsertSchema } from "../lib/server/validation";
+import { db } from "../db/client.js";
+import { cashAccounts } from "../db/schema.js";
+import { requireAuth } from "../lib/server/requireAuth.js";
+import { cashInsertSchema } from "../lib/server/validation.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!requireAuth(req, res)) return;

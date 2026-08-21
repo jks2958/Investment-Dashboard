@@ -1,16 +1,16 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { eq } from "drizzle-orm";
 
-import { db } from "../db/client";
-import { dashboardSettings } from "../db/schema";
+import { db } from "../db/client.js";
+import { dashboardSettings } from "../db/schema.js";
 import {
   DEFAULT_ACCENT,
   DEFAULT_CARD_SKIN,
   DEFAULT_LAYOUT_LG,
   DEFAULT_LAYOUT_MD,
-} from "../lib/server/dashboardDefaults";
-import { requireAuth } from "../lib/server/requireAuth";
-import { dashboardSettingsUpdateSchema } from "../lib/server/validation";
+} from "../lib/server/dashboardDefaults.js";
+import { requireAuth } from "../lib/server/requireAuth.js";
+import { dashboardSettingsUpdateSchema } from "../lib/server/validation.js";
 
 const SETTINGS_ID = 1;
 

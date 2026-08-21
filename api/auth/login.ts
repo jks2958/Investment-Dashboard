@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { z } from "zod";
 
-import { createSessionCookie, isHttpsRequest, verifyPassphrase } from "../../lib/server/session";
+import { createSessionCookie, isHttpsRequest, verifyPassphrase } from "../../lib/server/session.js";
 
 const bodySchema = z.object({ passphrase: z.string().min(1) });
 

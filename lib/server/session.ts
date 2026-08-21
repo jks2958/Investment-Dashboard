@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-import { db } from "../../db/client";
-import { authConfig } from "../../db/schema";
+import { db } from "../../db/client.js";
+import { authConfig } from "../../db/schema.js";
 
 const COOKIE_NAME = "session";
 const AUTH_CONFIG_ID = 1;
