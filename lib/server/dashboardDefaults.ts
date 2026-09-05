@@ -1,7 +1,7 @@
 import type { AllocationTargets, WidgetLayoutItem } from "../../db/schema.js";
 
-export const DEFAULT_ACCENT = "orange";
-export const DEFAULT_CARD_SKIN = "gold";
+export const DEFAULT_ACCENT = "forest";
+export const DEFAULT_CARD_SKIN = "forest";
 
 /** All zeroes: the drift widget treats this as "no targets set yet". */
 export const DEFAULT_TARGETS: AllocationTargets = {

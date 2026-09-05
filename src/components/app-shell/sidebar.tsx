@@ -34,10 +34,10 @@ function NavLink({
     <Link
       href={href}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
         active
-          ? "bg-primary/15 text-primary"
-          : "text-muted-foreground hover:bg-accent hover:text-foreground",
+          ? "bg-nav-active font-semibold text-nav-active-foreground"
+          : "font-medium text-muted-foreground hover:bg-accent hover:text-foreground",
       )}
     >
       <Icon className="size-4.5 shrink-0" />
@@ -63,7 +63,7 @@ export function Sidebar({ className }: { className?: string }) {
   return (
     <aside
       className={cn(
-        "flex w-full flex-col justify-between border-r border-border p-5",
+        "flex w-full flex-col justify-between border-r border-border bg-sidebar p-5 text-sidebar-foreground",
         className,
       )}
     >
@@ -106,10 +106,10 @@ export function Sidebar({ className }: { className?: string }) {
             type="button"
             onClick={() => setOtherOpen((o) => !o)}
             className={cn(
-              "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+              "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
               investmentsOpen
-                ? "bg-primary/15 text-primary"
-                : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                ? "bg-nav-active font-semibold text-nav-active-foreground"
+                : "font-medium text-muted-foreground hover:bg-accent hover:text-foreground",
             )}
           >
             <Layers className="size-4.5 shrink-0" />

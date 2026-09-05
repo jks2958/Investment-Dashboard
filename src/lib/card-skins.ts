@@ -1,6 +1,13 @@
-export type CardSkin = "gold" | "platinum" | "onyx" | "sapphire" | "rose-gold";
+export type CardSkin =
+  | "forest"
+  | "gold"
+  | "platinum"
+  | "onyx"
+  | "sapphire"
+  | "rose-gold";
 
 export const CARD_SKIN_VALUES: CardSkin[] = [
+  "forest",
   "gold",
   "platinum",
   "onyx",
@@ -18,6 +25,18 @@ type SkinDef = {
 const LIGHT_TEXT = "text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.35)]";
 
 export const CARD_SKINS: Record<CardSkin, SkinDef> = {
+  // Three layers, painted front to back: a fine dot matrix, a soft glow in the
+  // top-right corner, then the base diagonal gradient.
+  forest: {
+    label: "Forest",
+    gradient: [
+      "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.10) 1px, transparent 0) 0 0/14px 14px",
+      "radial-gradient(120% 95% at 88% 2%, #2f9761 0%, rgba(47,151,97,0) 60%)",
+      "linear-gradient(135deg, #12402d 0%, #1a5c3c 52%, #0e3223 100%)",
+    ].join(", "),
+    textClass: LIGHT_TEXT,
+    badgeClass: "bg-white/15",
+  },
   gold: {
     label: "Gold",
     gradient: "linear-gradient(135deg, #d9b13d 0%, #f5df9b 45%, #96721a 100%)",

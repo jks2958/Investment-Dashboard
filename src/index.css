@@ -6,36 +6,47 @@
 :root {
   --radius: 0.75rem;
 
-  --background: oklch(0.99 0 0);
-  --foreground: oklch(0.16 0.01 285);
+  /* Neutral grey shell in three steps — sidebar darkest, then the page, then
+     white cards on top — so the surfaces separate without tinting anything.
+     Colour comes from the accent and the hero card, not the background. */
+  --background: oklch(0.978 0.001 285);
+  --foreground: oklch(0.18 0.006 285);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.16 0.01 285);
+  --card-foreground: oklch(0.18 0.006 285);
+
+  --sidebar: oklch(0.949 0.003 285);
+  --sidebar-foreground: oklch(0.18 0.006 285);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0.01 285);
+  --popover-foreground: oklch(0.18 0.006 285);
 
-  --primary: oklch(0.7 0.16 55);
+  --primary: oklch(0.52 0.13 152);
   --primary-foreground: oklch(0.99 0 0);
 
-  --secondary: oklch(0.96 0.01 285);
-  --secondary-foreground: oklch(0.16 0.01 285);
+  --secondary: oklch(0.944 0.003 285);
+  --secondary-foreground: oklch(0.18 0.006 285);
 
-  --muted: oklch(0.96 0.01 285);
-  --muted-foreground: oklch(0.5 0.01 285);
+  --muted: oklch(0.944 0.003 285);
+  --muted-foreground: oklch(0.47 0.008 285);
 
-  --accent: oklch(0.96 0.01 285);
-  --accent-foreground: oklch(0.16 0.01 285);
+  --accent: oklch(0.935 0.004 285);
+  --accent-foreground: oklch(0.18 0.006 285);
 
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --positive: oklch(0.65 0.16 145);
+  --positive: oklch(0.62 0.16 148);
   --positive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.9 0.005 285);
-  --input: oklch(0.9 0.005 285);
-  --ring: oklch(0.7 0.16 55);
+  --border: oklch(0.888 0.004 285);
+  --input: oklch(0.888 0.004 285);
+  --ring: oklch(0.52 0.13 152);
+
+  /* Derived from the accent so the active nav pill follows whichever preset
+     is chosen, rather than being pinned to one hue. */
+  --nav-active: color-mix(in oklab, var(--primary) 26%, white);
+  --nav-active-foreground: color-mix(in oklab, var(--primary) 78%, black);
 
   --trend-cash: oklch(0.65 0.16 145);
   --trend-stock: #2a78d6;
@@ -50,6 +61,11 @@
 
   --card: oklch(0.175 0.01 270);
   --card-foreground: oklch(0.95 0.005 285);
+
+  /* Sits between the page and a card, keeping the same three-surface
+     hierarchy the light theme has. */
+  --sidebar: oklch(0.156 0.009 270);
+  --sidebar-foreground: oklch(0.95 0.005 285);
 
   --popover: oklch(0.2 0.012 275);
   --popover-foreground: oklch(0.95 0.005 285);
@@ -81,9 +97,37 @@
   --trend-fund: #9c85e9;
   --trend-crypto: #c98500;
   --trend-other: #9ca3af;
+
+  /* A translucent wash of the accent reads better than a lightened one on a
+     dark ground. */
+  --nav-active: color-mix(in oklab, var(--primary) 18%, transparent);
+  --nav-active-foreground: var(--primary);
 }
 
-/* Accent presets: same L/C as the default orange, hue rotated */
+/* Accent presets: hue-rotated, except forest which is deeper so it stays
+   legible as link and label text on a light ground. */
+:root[data-accent="forest"] {
+  --primary: oklch(0.52 0.13 152);
+  --primary-foreground: oklch(0.99 0 0);
+  --ring: oklch(0.52 0.13 152);
+}
+:root.dark[data-accent="forest"] {
+  --primary: oklch(0.76 0.17 148);
+  --primary-foreground: oklch(0.16 0.012 275);
+  --ring: oklch(0.76 0.17 148);
+}
+
+:root[data-accent="orange"] {
+  --primary: oklch(0.7 0.16 55);
+  --primary-foreground: oklch(0.99 0 0);
+  --ring: oklch(0.7 0.16 55);
+}
+:root.dark[data-accent="orange"] {
+  --primary: oklch(0.74 0.17 55);
+  --primary-foreground: oklch(0.16 0.012 275);
+  --ring: oklch(0.74 0.17 55);
+}
+
 :root[data-accent="blue"] {
   --primary: oklch(0.7 0.16 250);
   --primary-foreground: oklch(0.99 0 0);
@@ -150,6 +194,11 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-nav-active: var(--nav-active);
+  --color-nav-active-foreground: var(--nav-active-foreground);
 
   --color-trend-cash: var(--trend-cash);
   --color-trend-stock: var(--trend-stock);

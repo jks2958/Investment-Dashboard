@@ -139,9 +139,23 @@ export const widgetLayoutItemSchema = z.object({
   h: z.coerce.number().int().min(1),
 });
 
-export const accentSchema = z.enum(["orange", "blue", "emerald", "violet", "rose"]);
+export const accentSchema = z.enum([
+  "forest",
+  "orange",
+  "blue",
+  "emerald",
+  "violet",
+  "rose",
+]);
 
-export const cardSkinSchema = z.enum(["gold", "platinum", "onyx", "sapphire", "rose-gold"]);
+export const cardSkinSchema = z.enum([
+  "forest",
+  "gold",
+  "platinum",
+  "onyx",
+  "sapphire",
+  "rose-gold",
+]);
 
 const percent = z.coerce.number().min(0).max(100);
 

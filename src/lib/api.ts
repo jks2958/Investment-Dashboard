@@ -135,7 +135,7 @@ export type WidgetLayoutItem = {
   h: number;
 };
 
-export type Accent = "orange" | "blue" | "emerald" | "violet" | "rose";
+export type Accent = "forest" | "orange" | "blue" | "emerald" | "violet" | "rose";
 
 /** Target portfolio mix, as percentages. All zeroes means "not configured". */
 export type AllocationTargets = {

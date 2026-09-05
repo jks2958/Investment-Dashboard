@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/theme";
 
 const ACCENT_PRESETS: { value: Accent; label: string; swatch: string }[] = [
+  { value: "forest", label: "Forest", swatch: "oklch(0.52 0.13 152)" },
   { value: "orange", label: "Orange", swatch: "oklch(0.7 0.16 55)" },
   { value: "blue", label: "Blue", swatch: "oklch(0.7 0.16 250)" },
   { value: "emerald", label: "Emerald", swatch: "oklch(0.7 0.16 150)" },
