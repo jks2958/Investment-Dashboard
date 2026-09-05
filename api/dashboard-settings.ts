@@ -8,6 +8,7 @@ import {
   DEFAULT_CARD_SKIN,
   DEFAULT_LAYOUT_LG,
   DEFAULT_LAYOUT_MD,
+  DEFAULT_TARGETS,
 } from "../lib/server/dashboardDefaults.js";
 import { requireAuth } from "../lib/server/requireAuth.js";
 import { dashboardSettingsUpdateSchema } from "../lib/server/validation.js";
@@ -26,6 +27,7 @@ async function getOrCreateSettings() {
       layoutMd: DEFAULT_LAYOUT_MD,
       accent: DEFAULT_ACCENT,
       cardSkin: DEFAULT_CARD_SKIN,
+      targets: DEFAULT_TARGETS,
     })
     .onConflictDoNothing()
     .returning();
@@ -54,7 +56,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     await getOrCreateSettings();
 
-    const { reset, layoutLg, layoutMd, accent, cardSkin } = parsed.data;
+    const { reset, layoutLg, layoutMd, accent, cardSkin, targets } = parsed.data;
+    // Reset restores the default widget layout only — accent, card skin and
+    // allocation targets are user preferences, not layout.
     const updates = reset
       ? { layoutLg: DEFAULT_LAYOUT_LG, layoutMd: DEFAULT_LAYOUT_MD }
       : {
@@ -62,6 +66,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           ...(layoutMd !== undefined ? { layoutMd } : {}),
           ...(accent !== undefined ? { accent } : {}),
           ...(cardSkin !== undefined ? { cardSkin } : {}),
+          ...(targets !== undefined ? { targets } : {}),
         };
 
     const [updated] = await db

@@ -1,7 +1,7 @@
 import { inArray } from "drizzle-orm";
 
 import { db } from "../../db/client.js";
-import { holdings, priceCache } from "../../db/schema.js";
+import { holdings, priceCache, wishlistItems } from "../../db/schema.js";
 
 const STALE_MS = 15 * 60 * 1000;
 const FINNHUB_BASE = "https://finnhub.io/api/v1";
@@ -50,12 +50,22 @@ async function fetchCoinGeckoPrices(
 }
 
 export async function refreshStalePrices(): Promise<void> {
-  const rows = await db
-    .selectDistinct({
-      symbol: holdings.symbol,
-      assetType: holdings.assetType,
-    })
-    .from(holdings);
+  // Wishlist symbols are priced too, so the target tracker can tell you how
+  // far a watched symbol is from the price you're waiting for.
+  const [holdingRows, wishlistRows] = await Promise.all([
+    db
+      .selectDistinct({ symbol: holdings.symbol, assetType: holdings.assetType })
+      .from(holdings),
+    db
+      .selectDistinct({ symbol: wishlistItems.symbol, assetType: wishlistItems.assetType })
+      .from(wishlistItems),
+  ]);
+
+  const bySymbol = new Map<string, { symbol: string; assetType: "stock" | "fund" | "crypto" | "cash" }>();
+  for (const row of [...holdingRows, ...wishlistRows]) {
+    if (!bySymbol.has(row.symbol)) bySymbol.set(row.symbol, row);
+  }
+  const rows = [...bySymbol.values()];
 
   if (rows.length === 0) return;
 

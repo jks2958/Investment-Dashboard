@@ -1,7 +1,16 @@
-import type { WidgetLayoutItem } from "../../db/schema.js";
+import type { AllocationTargets, WidgetLayoutItem } from "../../db/schema.js";
 
 export const DEFAULT_ACCENT = "orange";
 export const DEFAULT_CARD_SKIN = "gold";
+
+/** All zeroes: the drift widget treats this as "no targets set yet". */
+export const DEFAULT_TARGETS: AllocationTargets = {
+  stock: 0,
+  fund: 0,
+  crypto: 0,
+  cash: 0,
+  other: 0,
+};
 
 export const DEFAULT_LAYOUT_LG: WidgetLayoutItem[] = [
   { i: "total-assets", type: "total-assets", x: 0, y: 0, w: 4, h: 6 },

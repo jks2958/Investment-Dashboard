@@ -111,7 +111,12 @@ export type WidgetType =
   | "transactions"
   | "holdings-stocks"
   | "holdings-funds"
-  | "holdings-crypto";
+  | "holdings-crypto"
+  | "net-worth-trend"
+  | "gainers-losers"
+  | "cash-runway"
+  | "wishlist-targets"
+  | "allocation-drift";
 
 export type WidgetLayoutItem = {
   i: string;
@@ -124,11 +129,21 @@ export type WidgetLayoutItem = {
 
 export type Accent = "orange" | "blue" | "emerald" | "violet" | "rose";
 
+/** Target portfolio mix, as percentages. All zeroes means "not configured". */
+export type AllocationTargets = {
+  stock: number;
+  fund: number;
+  crypto: number;
+  cash: number;
+  other: number;
+};
+
 export type DashboardSettings = {
   layoutLg: WidgetLayoutItem[];
   layoutMd: WidgetLayoutItem[];
   accent: Accent;
   cardSkin: CardSkin;
+  targets: AllocationTargets;
 };
 
 export type DashboardSettingsUpdate = {
@@ -136,7 +151,15 @@ export type DashboardSettingsUpdate = {
   layoutMd?: WidgetLayoutItem[];
   accent?: Accent;
   cardSkin?: CardSkin;
+  targets?: AllocationTargets;
   reset?: boolean;
+};
+
+export type CachedPrice = {
+  symbol: string;
+  assetType: AssetType | "cash";
+  lastPrice: string;
+  fetchedAt: string;
 };
 
 export type NetWorthSnapshot = {
@@ -206,7 +229,14 @@ export const api = {
   },
 
   snapshots: {
-    list: () => request<NetWorthSnapshot[]>("/api/snapshots"),
+    list: (days?: number) =>
+      request<NetWorthSnapshot[]>(
+        days === undefined ? "/api/snapshots" : `/api/snapshots?days=${days}`,
+      ),
+  },
+
+  prices: {
+    list: () => request<CachedPrice[]>("/api/prices"),
   },
 
   dashboardSettings: {

@@ -18,6 +18,15 @@ export type WidgetLayoutItem = {
   h: number;
 };
 
+/** Target portfolio mix, as percentages. All zeroes means "not configured". */
+export type AllocationTargets = {
+  stock: number;
+  fund: number;
+  crypto: number;
+  cash: number;
+  other: number;
+};
+
 export const assetTypeEnum = pgEnum("asset_type", [
   "stock",
   "fund",
@@ -116,5 +125,9 @@ export const dashboardSettings = pgTable("dashboard_settings", {
   layoutMd: jsonb("layout_md").$type<WidgetLayoutItem[]>().notNull(),
   accent: text("accent").notNull().default("orange"),
   cardSkin: text("card_skin").notNull().default("gold"),
+  targets: jsonb("targets")
+    .$type<AllocationTargets>()
+    .notNull()
+    .default({ stock: 0, fund: 0, crypto: 0, cash: 0, other: 0 }),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

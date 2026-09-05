@@ -11,7 +11,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
+  const rawDays = req.query.days;
+  const daysParam = Number(Array.isArray(rawDays) ? rawDays[0] : rawDays);
+  const days = Number.isFinite(daysParam) ? Math.min(Math.max(daysParam, 1), 730) : 30;
+
   await recordTodaySnapshot();
-  const snapshots = await getRecentSnapshots(30);
+  const snapshots = await getRecentSnapshots(days);
   res.status(200).json(snapshots);
 }

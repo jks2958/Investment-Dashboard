@@ -5,17 +5,22 @@ import { NetIncomeCard } from "@/components/net-income-card";
 import type { WidgetType } from "@/lib/api";
 import { HoldingsByTypePage } from "@/pages/holdings-by-type";
 import { WishlistPage } from "@/pages/wishlist";
+import { AllocationDriftWidget } from "@/widgets/allocation-drift-widget";
 import { AllocationWidget } from "@/widgets/allocation-widget";
 import { CashAccountsWidget } from "@/widgets/cash-accounts-widget";
+import { CashRunwayWidget } from "@/widgets/cash-runway-widget";
+import { GainersLosersWidget } from "@/widgets/gainers-losers-widget";
 import {
   MiniCashWidget,
   MiniCryptoWidget,
   MiniFundsWidget,
   MiniStocksWidget,
 } from "@/widgets/mini-stat-widgets";
+import { NetWorthTrendWidget } from "@/widgets/net-worth-trend-widget";
 import { OtherAssetsWidget } from "@/widgets/other-assets-widget";
 import { TotalAssetsWidget } from "@/widgets/total-assets-widget";
 import { TransactionsWidget } from "@/widgets/transactions-widget";
+import { WishlistTargetsWidget } from "@/widgets/wishlist-targets-widget";
 
 function HoldingsStocksWidget() {
   return <HoldingsByTypePage assetType="stock" heading="Stocks Portfolio" />;
@@ -108,5 +113,30 @@ export const WIDGET_REGISTRY: Record<WidgetType, WidgetDefinition> = {
     label: "Crypto Holdings",
     Component: HoldingsCryptoWidget,
     defaultSize: { w: 6, h: 8 },
+  },
+  "net-worth-trend": {
+    label: "Net Worth Trend",
+    Component: NetWorthTrendWidget,
+    defaultSize: { w: 8, h: 9 },
+  },
+  "gainers-losers": {
+    label: "Gainers & Losers",
+    Component: GainersLosersWidget,
+    defaultSize: { w: 4, h: 9 },
+  },
+  "cash-runway": {
+    label: "Cash Runway",
+    Component: CashRunwayWidget,
+    defaultSize: { w: 4, h: 8 },
+  },
+  "wishlist-targets": {
+    label: "Wishlist Targets",
+    Component: WishlistTargetsWidget,
+    defaultSize: { w: 4, h: 9 },
+  },
+  "allocation-drift": {
+    label: "Allocation Drift",
+    Component: AllocationDriftWidget,
+    defaultSize: { w: 6, h: 9 },
   },
 };

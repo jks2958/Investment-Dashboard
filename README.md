@@ -60,7 +60,9 @@ To deploy: import the repo into Vercel, set the same env vars there, and connect
 - **Income / Expense** — transaction log (income/expense with category), monthly summary.
 - **Wishlist** — symbols you're watching, with an optional target price.
 - **Account** — display name, cash accounts CRUD, other assets CRUD.
-- **Settings** — theme (light/dark), accent color preset, change passphrase.
+- **Settings** — theme (light/dark), accent color preset, Total Assets card
+  skin, target allocation (the mix the Allocation Drift widget compares
+  against), change passphrase.
 
 ## Customizable dashboard
 
@@ -76,14 +78,31 @@ translate to touch-sized screens):
 - **Remove** a widget with its × button.
 - **Reset to default** restores the original layout.
 
+Available widgets, beyond the defaults listed above:
+
+- **Net Worth Trend** — net worth charted over 30/90/365 days.
+- **Gainers & Losers** — unrealized P/L per holding (market value vs. cost
+  basis), best and worst ranked, with a portfolio-wide total.
+- **Cash Runway** — how many months of expenses your cash covers, against the
+  trailing 3 complete months of spending.
+- **Wishlist Targets** — how far each watched symbol is from its target buy
+  price, closest first.
+- **Allocation Drift** — actual vs. target mix per asset type, with the amount
+  to add or trim to get back on target. Set targets in Settings.
+- Cash Accounts, Other Assets, Wishlist, Recent Transactions, and per-type
+  holdings lists (stocks / funds / crypto).
+
 Layout is stored per breakpoint (desktop/tablet) in the `dashboard_settings`
 table and applies across devices. Widget types live in
 `src/lib/widget-registry.tsx` — add an entry there (plus a self-contained
 component under `src/widgets/`) to make a new widget available in the palette.
+A new type also needs adding to `WidgetType` in `src/lib/api.ts` and
+`widgetTypeSchema` in `lib/server/validation.ts`, which are mirrored by hand.
 
-Sparklines and the "vs last month" deltas are driven by a daily
-`net_worth_snapshots` table that self-records on each dashboard load — history
-accumulates the more the app is used; there's no synthetic backfill.
+Sparklines, the "vs last month" deltas and the Net Worth Trend chart are driven
+by a daily `net_worth_snapshots` table that self-records on each dashboard load
+— history accumulates the more the app is used; there's no synthetic backfill,
+so the trend chart needs a couple of days before it has a line to draw.
 
 ## Where things live
 

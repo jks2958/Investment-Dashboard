@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useDashboardSettings, useUpdateDashboardSettings } from "@/hooks/use-dashboard-settings";
-import { api, type Accent } from "@/lib/api";
+import { api, type Accent, type AllocationTargets } from "@/lib/api";
 import { CARD_SKINS, CARD_SKIN_VALUES } from "@/lib/card-skins";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/theme";
@@ -19,6 +19,22 @@ const ACCENT_PRESETS: { value: Accent; label: string; swatch: string }[] = [
   { value: "rose", label: "Rose", swatch: "oklch(0.7 0.16 350)" },
 ];
 
+const TARGET_KEYS: { key: keyof AllocationTargets; label: string }[] = [
+  { key: "stock", label: "Stocks" },
+  { key: "fund", label: "Funds" },
+  { key: "crypto", label: "Crypto" },
+  { key: "cash", label: "Cash" },
+  { key: "other", label: "Other Assets" },
+];
+
+const EMPTY_TARGETS: Record<keyof AllocationTargets, string> = {
+  stock: "0",
+  fund: "0",
+  crypto: "0",
+  cash: "0",
+  other: "0",
+};
+
 export function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { data: dashboardSettings } = useDashboardSettings();
@@ -28,6 +44,38 @@ export function SettingsPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [success, setSuccess] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
+  const [targetDraft, setTargetDraft] =
+    React.useState<Record<keyof AllocationTargets, string> | null>(null);
+
+  const savedTargets = dashboardSettings?.targets;
+  React.useEffect(() => {
+    if (!savedTargets) return;
+    setTargetDraft({
+      stock: String(savedTargets.stock),
+      fund: String(savedTargets.fund),
+      crypto: String(savedTargets.crypto),
+      cash: String(savedTargets.cash),
+      other: String(savedTargets.other),
+    });
+  }, [savedTargets]);
+
+  const targets = targetDraft ?? EMPTY_TARGETS;
+  const targetTotal = TARGET_KEYS.reduce((sum, t) => sum + (Number(targets[t.key]) || 0), 0);
+  // 100% is a complete mix; 0% clears the targets and hides the drift widget's
+  // comparison. Anything in between would silently misreport drift.
+  const targetsValid = targetTotal === 100 || targetTotal === 0;
+
+  function saveTargets() {
+    updateDashboardSettings.mutate({
+      targets: {
+        stock: Number(targets.stock) || 0,
+        fund: Number(targets.fund) || 0,
+        crypto: Number(targets.crypto) || 0,
+        cash: Number(targets.cash) || 0,
+        other: Number(targets.other) || 0,
+      },
+    });
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -127,6 +175,64 @@ export function SettingsPage() {
                 </button>
               );
             })}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <h2 className="text-base font-semibold">Target allocation</h2>
+          <span
+            className={cn(
+              "text-sm font-medium tabular-nums",
+              targetsValid ? "text-muted-foreground" : "text-destructive",
+            )}
+          >
+            {targetTotal}%
+          </span>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            The mix you're aiming for. The Allocation Drift widget compares your actual portfolio
+            against it. Set every field to 0 to turn it off.
+          </p>
+
+          <div className="flex flex-wrap gap-3">
+            {TARGET_KEYS.map(({ key, label }) => (
+              <div key={key} className="w-28 space-y-1.5">
+                <Label htmlFor={`target-${key}`}>{label}</Label>
+                <div className="relative">
+                  <Input
+                    id={`target-${key}`}
+                    type="number"
+                    min={0}
+                    max={100}
+                    inputMode="numeric"
+                    value={targets[key]}
+                    onChange={(e) =>
+                      setTargetDraft({ ...targets, [key]: e.target.value })
+                    }
+                    className="pr-7"
+                  />
+                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    %
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {!targetsValid && (
+            <p className="text-sm text-destructive">Targets must add up to 100% (or 0% to clear).</p>
+          )}
+
+          <div className="flex items-center gap-2">
+            <Button onClick={saveTargets} disabled={!targetsValid || updateDashboardSettings.isPending}>
+              {updateDashboardSettings.isPending ? "Saving…" : "Save targets"}
+            </Button>
+            <Button variant="outline" onClick={() => setTargetDraft(EMPTY_TARGETS)}>
+              Clear
+            </Button>
           </div>
         </CardContent>
       </Card>

@@ -85,6 +85,11 @@ export const widgetTypeSchema = z.enum([
   "holdings-stocks",
   "holdings-funds",
   "holdings-crypto",
+  "net-worth-trend",
+  "gainers-losers",
+  "cash-runway",
+  "wishlist-targets",
+  "allocation-drift",
 ]);
 
 export const widgetLayoutItemSchema = z.object({
@@ -100,10 +105,26 @@ export const accentSchema = z.enum(["orange", "blue", "emerald", "violet", "rose
 
 export const cardSkinSchema = z.enum(["gold", "platinum", "onyx", "sapphire", "rose-gold"]);
 
+const percent = z.coerce.number().min(0).max(100);
+
+export const allocationTargetsSchema = z
+  .object({
+    stock: percent,
+    fund: percent,
+    crypto: percent,
+    cash: percent,
+    other: percent,
+  })
+  .refine(
+    (t) => t.stock + t.fund + t.crypto + t.cash + t.other <= 100.001,
+    "Target allocation cannot add up to more than 100%",
+  );
+
 export const dashboardSettingsUpdateSchema = z.object({
   layoutLg: z.array(widgetLayoutItemSchema).max(60).optional(),
   layoutMd: z.array(widgetLayoutItemSchema).max(60).optional(),
   accent: accentSchema.optional(),
   cardSkin: cardSkinSchema.optional(),
+  targets: allocationTargetsSchema.optional(),
   reset: z.boolean().optional(),
 });

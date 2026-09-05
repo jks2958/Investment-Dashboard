@@ -36,6 +36,13 @@
       "when": 1787236850859,
       "tag": "0004_white_chamber",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788585755375,
+      "tag": "0005_mixed_makkari",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "dashboard_settings" ADD COLUMN "targets" jsonb DEFAULT '{"stock":0,"fund":0,"crypto":0,"cash":0,"other":0}'::jsonb NOT NULL;
