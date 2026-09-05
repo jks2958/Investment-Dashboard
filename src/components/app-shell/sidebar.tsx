@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
+import { TREND_WINDOW_LABEL } from "@/lib/date-range";
 import { useProfile } from "@/hooks/use-profile";
 import { usePortfolioTotals } from "@/hooks/use-portfolio-totals";
 import { formatCurrency, formatPercent } from "@/lib/format";
@@ -84,7 +85,9 @@ export function Sidebar({ className }: { className?: string }) {
             )}
           </div>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {totalDebt > 0 ? `after ${formatCurrency(totalDebt)} owed` : "vs last month"}
+            {totalDebt > 0
+              ? `after ${formatCurrency(totalDebt)} owed`
+              : `vs ${TREND_WINDOW_LABEL} ago`}
           </p>
         </div>
 

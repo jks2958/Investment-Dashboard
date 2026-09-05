@@ -1,3 +1,9 @@
+/** Default window for anything showing a trend — the trend chart, the
+ *  sparklines, and the deltas derived from them. Kept in one place so the
+ *  figures and the labels describing them can't drift apart. */
+export const TREND_WINDOW_DAYS = 180;
+export const TREND_WINDOW_LABEL = "6 months";
+
 export function isInMonthOffset(dateIso: string, offsetMonths: number): boolean {
   const d = new Date();
   d.setMonth(d.getMonth() + offsetMonths);

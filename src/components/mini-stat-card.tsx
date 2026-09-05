@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { Sparkline } from "@/components/sparkline";
+import { TREND_WINDOW_LABEL } from "@/lib/date-range";
 import { formatCompactCurrency, formatPercent } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +37,10 @@ export function MiniStatCard({ id, label, value, delta, color, icon: Icon, serie
               delta >= 0 ? "text-positive" : "text-destructive",
             )}
           >
-            {formatPercent(delta)}
+            {formatPercent(delta)}{" "}
+            <span className="font-normal text-muted-foreground">
+              over {TREND_WINDOW_LABEL}
+            </span>
           </p>
         )}
       </div>

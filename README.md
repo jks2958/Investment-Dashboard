@@ -129,7 +129,8 @@ translate to touch-sized screens):
 
 Available widgets, beyond the defaults listed above:
 
-- **Net Worth Trend** — net worth charted over 30/90/365 days.
+- **Net Worth Trend** — net worth charted over 30 days / 90 days / 6 months /
+  1 year, opening on 6 months.
 - **Gainers & Losers** — unrealized P/L per holding (market value vs. cost
   basis), best and worst ranked, with a portfolio-wide total.
 - **Cash Runway** — how many months of expenses your cash covers, against the
@@ -152,8 +153,17 @@ component under `src/widgets/`) to make a new widget available in the palette.
 A new type also needs adding to `WidgetType` in `src/lib/api.ts` and
 `widgetTypeSchema` in `lib/server/validation.ts`, which are mirrored by hand.
 
-Sparklines, the "vs last month" deltas and the Net Worth Trend chart are driven
-by a daily `net_worth_snapshots` table that self-records on each dashboard load.
+Sparklines, the percentage deltas beside them and the Net Worth Trend chart are
+driven by a daily `net_worth_snapshots` table that self-records on each
+dashboard load. They all look back over the same window — 6 months, set once as
+`TREND_WINDOW_DAYS` in `src/lib/date-range.ts` alongside the label that
+describes it, so a figure and its caption can't drift apart. The trend chart
+opens there too but can be switched per-view without affecting the sparklines,
+which read a separate query key.
+
+The "vs last month" comparisons on the Net Income and Expenses cards are a
+different thing — calendar month against calendar month, computed from
+transactions rather than snapshots — and are deliberately left as they are.
 
 History can also be entered by hand, under **Account → Net worth history** —
 either one date at a time or by pasting rows (`date, cash, stocks, funds,

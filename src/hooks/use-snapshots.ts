@@ -1,14 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api, type SnapshotEntry } from "@/lib/api";
+import { TREND_WINDOW_DAYS } from "@/lib/date-range";
 
+/** Powers the sparklines and the deltas beside them. */
 export function useSnapshots() {
-  return useQuery({ queryKey: ["snapshots"], queryFn: () => api.snapshots.list() });
+  return useQuery({
+    queryKey: ["snapshots"],
+    queryFn: () => api.snapshots.list(TREND_WINDOW_DAYS),
+  });
 }
 
-/** Separate query key from useSnapshots so the default 30-day window (which
- *  powers the "vs last month" deltas and sparklines) isn't widened by the
- *  trend chart's own range selection. */
+/** Separate query key from useSnapshots so the trend chart's own range
+ *  selection doesn't widen or narrow the window the sparklines read. */
 export function useSnapshotRange(days: number) {
   return useQuery({
     queryKey: ["snapshots", days],

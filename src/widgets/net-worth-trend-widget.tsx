@@ -10,16 +10,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSnapshotRange } from "@/hooks/use-snapshots";
+import { TREND_WINDOW_DAYS } from "@/lib/date-range";
 import { formatCompactCurrency, formatCurrency, formatPercent } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-type Range = "30" | "90" | "365";
+type Range = "30" | "90" | "180" | "365";
 
 const RANGE_LABEL: Record<Range, string> = {
   "30": "Last 30 days",
   "90": "Last 90 days",
+  "180": "Last 6 months",
   "365": "Last year",
 };
+
+/** Opens on the shared default window, same as every other trend surface. */
+const DEFAULT_RANGE = String(TREND_WINDOW_DAYS) as Range;
 
 function shortDate(iso: string): string {
   const [, month, day] = iso.split("-");
@@ -27,7 +32,7 @@ function shortDate(iso: string): string {
 }
 
 export function NetWorthTrendWidget() {
-  const [range, setRange] = React.useState<Range>("30");
+  const [range, setRange] = React.useState<Range>(DEFAULT_RANGE);
   const { data: snapshots, isLoading } = useSnapshotRange(Number(range));
 
   const points = (snapshots ?? []).map((s) => ({
