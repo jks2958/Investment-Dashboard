@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import {
   Bookmark,
   ChevronRight,
+  Landmark,
   Layers,
   LayoutDashboard,
   LineChart,
@@ -49,7 +50,7 @@ export function Sidebar({ className }: { className?: string }) {
   const [location] = useLocation();
   const { logout } = useAuth();
   const { data: profile } = useProfile();
-  const { totalAssets, netWorthDeltaPct } = usePortfolioTotals();
+  const { netWorth, totalDebt, netWorthDeltaPct } = usePortfolioTotals();
 
   const investmentsOpen =
     location.startsWith("/investments") || location === "/investments";
@@ -74,7 +75,7 @@ export function Sidebar({ className }: { className?: string }) {
           <p className="text-sm text-muted-foreground">Net Worth</p>
           <div className="mt-1 flex items-center gap-2">
             <span className="text-3xl font-semibold text-primary">
-              {formatCurrency(totalAssets)}
+              {formatCurrency(netWorth)}
             </span>
             {netWorthDeltaPct !== undefined && (
               <span className="rounded-full bg-positive/15 px-2 py-0.5 text-xs font-medium text-positive">
@@ -82,7 +83,9 @@ export function Sidebar({ className }: { className?: string }) {
               </span>
             )}
           </div>
-          <p className="mt-0.5 text-xs text-muted-foreground">vs last month</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {totalDebt > 0 ? `after ${formatCurrency(totalDebt)} owed` : "vs last month"}
+          </p>
         </div>
 
         <nav className="mt-8 space-y-1">
@@ -137,6 +140,12 @@ export function Sidebar({ className }: { className?: string }) {
             icon={Wallet}
             label="Income / Expense"
             active={location === "/income-expense"}
+          />
+          <NavLink
+            href="/liabilities"
+            icon={Landmark}
+            label="Liabilities"
+            active={location === "/liabilities"}
           />
           <NavLink
             href="/wishlist"

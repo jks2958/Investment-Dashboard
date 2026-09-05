@@ -13,6 +13,7 @@ import { DashboardPage } from "@/pages/dashboard";
 import { CryptoPage } from "@/pages/investments-crypto";
 import { FundsPage } from "@/pages/investments-funds";
 import { IncomeExpensePage } from "@/pages/income-expense";
+import { LiabilitiesPage } from "@/pages/liabilities";
 import { SettingsPage } from "@/pages/settings";
 import { StocksPage } from "@/pages/stocks";
 import { WishlistPage } from "@/pages/wishlist";
@@ -23,6 +24,7 @@ const TITLES: Record<string, string> = {
   "/investments/funds": "Funds",
   "/investments/crypto": "Crypto",
   "/income-expense": "Income / Expense",
+  "/liabilities": "Liabilities & Commitments",
   "/wishlist": "Wishlist",
   "/account": "Account",
   "/settings": "Settings",
@@ -54,6 +56,7 @@ function Gated() {
         <Route path="/investments/funds" component={FundsPage} />
         <Route path="/investments/crypto" component={CryptoPage} />
         <Route path="/income-expense" component={IncomeExpensePage} />
+        <Route path="/liabilities" component={LiabilitiesPage} />
         <Route path="/wishlist" component={WishlistPage} />
         <Route path="/account" component={AccountPage} />
         <Route path="/settings" component={SettingsPage} />

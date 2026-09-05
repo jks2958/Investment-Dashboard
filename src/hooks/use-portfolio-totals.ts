@@ -1,4 +1,5 @@
 import { useCashAccounts } from "@/hooks/use-cash";
+import { useDebts } from "@/hooks/use-debts";
 import { useHoldings } from "@/hooks/use-holdings";
 import { useOtherAssets } from "@/hooks/use-other-assets";
 import { useSnapshots } from "@/hooks/use-snapshots";
@@ -15,10 +16,12 @@ export function usePortfolioTotals() {
   const { data: holdings, isLoading: holdingsLoading } = useHoldings();
   const { data: cashAccounts, isLoading: cashLoading } = useCashAccounts();
   const { data: otherAssets, isLoading: otherLoading } = useOtherAssets();
+  const { data: debts } = useDebts();
   const { data: snapshots } = useSnapshots();
 
   const totalCash = (cashAccounts ?? []).reduce((sum, a) => sum + Number(a.balance), 0);
   const totalOther = (otherAssets ?? []).reduce((sum, a) => sum + Number(a.value), 0);
+  const totalDebt = (debts ?? []).reduce((sum, d) => sum + Number(d.balance), 0);
 
   const valueByType: Record<AssetTypeKey, number> = {
     stock: 0,
@@ -39,17 +42,20 @@ export function usePortfolioTotals() {
     0,
   );
   const totalAssets = holdingsValue + totalCash + totalOther;
+  /** Assets minus what's owed — the real bottom line. */
+  const netWorth = totalAssets - totalDebt;
   const gainPct = totalInvested > 0 ? ((holdingsValue - totalInvested) / totalInvested) * 100 : undefined;
 
   const oldestSnapshot = snapshots?.[0];
   const netWorthDeltaPct = oldestSnapshot
     ? percentDelta(
-        totalAssets,
+        netWorth,
         Number(oldestSnapshot.cashValue) +
           Number(oldestSnapshot.stockValue) +
           Number(oldestSnapshot.fundValue) +
           Number(oldestSnapshot.cryptoValue) +
-          Number(oldestSnapshot.otherValue),
+          Number(oldestSnapshot.otherValue) -
+          Number(oldestSnapshot.debtTotal ?? 0),
       )
     : undefined;
 
@@ -81,6 +87,8 @@ export function usePortfolioTotals() {
   return {
     isLoading: holdingsLoading || cashLoading || otherLoading,
     totalAssets,
+    netWorth,
+    totalDebt,
     totalInvested,
     totalCash,
     totalOther,

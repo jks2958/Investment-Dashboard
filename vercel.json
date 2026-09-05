@@ -8,6 +8,13 @@
     { "source": "/api/wishlist/:id", "destination": "/api/wishlist?id=:id" },
     { "source": "/api/transactions/:id", "destination": "/api/transactions?id=:id" },
     { "source": "/api/auth/:action", "destination": "/api/auth?action=:action" },
+    { "source": "/api/debts/:id", "destination": "/api/liabilities?kind=debt&id=:id" },
+    { "source": "/api/debts", "destination": "/api/liabilities?kind=debt" },
+    {
+      "source": "/api/commitments/:id",
+      "destination": "/api/liabilities?kind=commitment&id=:id"
+    },
+    { "source": "/api/commitments", "destination": "/api/liabilities?kind=commitment" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [

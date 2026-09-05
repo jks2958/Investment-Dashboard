@@ -58,6 +58,7 @@ To deploy: import the repo into Vercel, set the same env vars there, and connect
   cards with sparklines.
 - **Stocks Portfolio**, **Other Investments → Funds / Crypto** — holdings CRUD, filtered by type.
 - **Income / Expense** — transaction log (income/expense with category), monthly summary.
+- **Liabilities & Commitments** — two tabs, deliberately separate (see below).
 - **Wishlist** — symbols you're watching, with an optional target price.
 - **Account** — display name, cash accounts CRUD, other assets CRUD.
 
@@ -67,6 +68,28 @@ can be entered retrospectively. Holdings show how long they've been held. The
 date is a record of when you acquired something — it does not rewrite past
 `net_worth_snapshots`, which only accumulate from the day you start using the
 app.
+
+## Debts vs. commitments
+
+These are two different things and the app keeps them apart on purpose:
+
+- **Debts** are money owed *now*, to someone specific — mortgage, car loan,
+  credit card. They **subtract from net worth**, so the sidebar figure is
+  assets minus debts, and snapshots record a `debt_total` so the Net Worth
+  Trend chart stays honest historically.
+- **Commitments** are money you'll need *later* but don't owe anyone yet —
+  tuition, a wedding, a car replacement. They **never touch net worth**;
+  subtracting a 2032 school fee from today's balance sheet would be meaningless
+  (it ignores eight years of income first). Instead each one computes the
+  monthly saving needed to be ready in time, and the total is compared against
+  what you're actually saving.
+
+Commitments carry a certainty (confirmed / likely / possible) so a firm date
+and a vague maybe don't count equally, and a `recurringYears` so four years of
+tuition is one row rather than four.
+
+Note that ongoing family support is a *recurring expense*, not a commitment —
+commitments are dated, finite costs.
 - **Settings** — theme (light/dark), accent color preset, Total Assets card
   skin, target allocation (the mix the Allocation Drift widget compares
   against), change passphrase.
@@ -96,6 +119,10 @@ Available widgets, beyond the defaults listed above:
   price, closest first.
 - **Allocation Drift** — actual vs. target mix per asset type, with the amount
   to add or trim to get back on target. Set targets in Settings.
+- **Debts** — total owed, share of assets, largest balances, and the
+  highest-rate debt to attack first.
+- **Future Commitments** — what to set aside monthly, measured against what
+  you're actually saving.
 - Cash Accounts, Other Assets, Wishlist, Recent Transactions, and per-type
   holdings lists (stocks / funds / crypto).
 

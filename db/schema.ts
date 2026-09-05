@@ -39,6 +39,33 @@ export const transactionTypeEnum = pgEnum("transaction_type", [
   "expense",
 ]);
 
+export const debtKindEnum = pgEnum("debt_kind", [
+  "mortgage",
+  "car",
+  "credit_card",
+  "student",
+  "personal",
+  "business",
+  "other",
+]);
+
+export const commitmentCategoryEnum = pgEnum("commitment_category", [
+  "education",
+  "family",
+  "purchase",
+  "medical",
+  "travel",
+  "other",
+]);
+
+/** How sure this future cost is, so "tuition due Sept 2032" and "maybe a new
+ *  car someday" don't carry equal weight in the totals. */
+export const commitmentCertaintyEnum = pgEnum("commitment_certainty", [
+  "confirmed",
+  "likely",
+  "possible",
+]);
+
 // acquiredOn is the user-supplied date the asset was actually acquired (or the
 // account opened), so assets can be entered retrospectively. Nullable: rows
 // created before this existed have no date, and it stays optional.
@@ -106,10 +133,45 @@ export const netWorthSnapshots = pgTable("net_worth_snapshots", {
   fundValue: numeric("fund_value", { precision: 18, scale: 2 }).notNull(),
   cryptoValue: numeric("crypto_value", { precision: 18, scale: 2 }).notNull(),
   otherValue: numeric("other_value", { precision: 18, scale: 2 }).notNull().default("0"),
+  debtTotal: numeric("debt_total", { precision: 18, scale: 2 }).notNull().default("0"),
   totalInvested: numeric("total_invested", {
     precision: 18,
     scale: 2,
   }).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+/** Money owed now. Subtracts from net worth. */
+export const debts = pgTable("debts", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: text("name").notNull(),
+  kind: debtKindEnum("kind").notNull(),
+  lender: text("lender"),
+  balance: numeric("balance", { precision: 18, scale: 2 }).notNull(),
+  originalAmount: numeric("original_amount", { precision: 18, scale: 2 }),
+  interestRate: numeric("interest_rate", { precision: 6, scale: 3 }),
+  monthlyPayment: numeric("monthly_payment", { precision: 18, scale: 2 }),
+  startedOn: date("started_on"),
+  payoffTargetOn: date("payoff_target_on"),
+  note: text("note"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+/** Money you'll need later but don't owe anyone yet. Deliberately kept out of
+ *  the net worth maths — a future cost isn't a present liability. */
+export const commitments = pgTable("commitments", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: text("name").notNull(),
+  category: commitmentCategoryEnum("category").notNull(),
+  amount: numeric("amount", { precision: 18, scale: 2 }).notNull(),
+  dueOn: date("due_on").notNull(),
+  /** Repeats annually this many times from dueOn — 4 years of tuition is one row. */
+  recurringYears: integer("recurring_years").notNull().default(1),
+  certainty: commitmentCertaintyEnum("certainty").notNull().default("confirmed"),
+  fundedAmount: numeric("funded_amount", { precision: 18, scale: 2 })
+    .notNull()
+    .default("0"),
+  note: text("note"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

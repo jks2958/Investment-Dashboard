@@ -122,7 +122,9 @@ export type WidgetType =
   | "gainers-losers"
   | "cash-runway"
   | "wishlist-targets"
-  | "allocation-drift";
+  | "allocation-drift"
+  | "debts"
+  | "commitments";
 
 export type WidgetLayoutItem = {
   i: string;
@@ -176,7 +178,81 @@ export type NetWorthSnapshot = {
   fundValue: string;
   cryptoValue: string;
   otherValue: string;
+  debtTotal: string;
   totalInvested: string;
+};
+
+export type DebtKind =
+  | "mortgage"
+  | "car"
+  | "credit_card"
+  | "student"
+  | "personal"
+  | "business"
+  | "other";
+
+/** Money owed now — subtracts from net worth. */
+export type Debt = {
+  id: number;
+  name: string;
+  kind: DebtKind;
+  lender: string | null;
+  balance: string;
+  originalAmount: string | null;
+  interestRate: string | null;
+  monthlyPayment: string | null;
+  startedOn: string | null;
+  payoffTargetOn: string | null;
+  note: string | null;
+  createdAt: string;
+};
+
+export type DebtInput = {
+  name: string;
+  kind: DebtKind;
+  lender?: string;
+  balance: number;
+  originalAmount?: number;
+  interestRate?: number;
+  monthlyPayment?: number;
+  startedOn?: string;
+  payoffTargetOn?: string;
+  note?: string;
+};
+
+export type CommitmentCategory =
+  | "education"
+  | "family"
+  | "purchase"
+  | "medical"
+  | "travel"
+  | "other";
+
+export type CommitmentCertainty = "confirmed" | "likely" | "possible";
+
+/** A future cost you don't owe anyone yet — deliberately excluded from net worth. */
+export type Commitment = {
+  id: number;
+  name: string;
+  category: CommitmentCategory;
+  amount: string;
+  dueOn: string;
+  recurringYears: number;
+  certainty: CommitmentCertainty;
+  fundedAmount: string;
+  note: string | null;
+  createdAt: string;
+};
+
+export type CommitmentInput = {
+  name: string;
+  category: CommitmentCategory;
+  amount: number;
+  dueOn: string;
+  recurringYears?: number;
+  certainty?: CommitmentCertainty;
+  fundedAmount?: number;
+  note?: string;
 };
 
 export const api = {
@@ -243,6 +319,27 @@ export const api = {
 
   prices: {
     list: () => request<CachedPrice[]>("/api/prices"),
+  },
+
+  debts: {
+    list: () => request<Debt[]>("/api/debts"),
+    create: (input: DebtInput) =>
+      request<Debt>("/api/debts", { method: "POST", body: JSON.stringify(input) }),
+    update: (id: number, input: Partial<DebtInput>) =>
+      request<Debt>(`/api/debts/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
+    remove: (id: number) => request<void>(`/api/debts/${id}`, { method: "DELETE" }),
+  },
+
+  commitments: {
+    list: () => request<Commitment[]>("/api/commitments"),
+    create: (input: CommitmentInput) =>
+      request<Commitment>("/api/commitments", { method: "POST", body: JSON.stringify(input) }),
+    update: (id: number, input: Partial<CommitmentInput>) =>
+      request<Commitment>(`/api/commitments/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      }),
+    remove: (id: number) => request<void>(`/api/commitments/${id}`, { method: "DELETE" }),
   },
 
   dashboardSettings: {

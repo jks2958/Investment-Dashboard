@@ -9,6 +9,8 @@ import { AllocationDriftWidget } from "@/widgets/allocation-drift-widget";
 import { AllocationWidget } from "@/widgets/allocation-widget";
 import { CashAccountsWidget } from "@/widgets/cash-accounts-widget";
 import { CashRunwayWidget } from "@/widgets/cash-runway-widget";
+import { CommitmentsWidget } from "@/widgets/commitments-widget";
+import { DebtsWidget } from "@/widgets/debts-widget";
 import { GainersLosersWidget } from "@/widgets/gainers-losers-widget";
 import {
   MiniCashWidget,
@@ -138,5 +140,15 @@ export const WIDGET_REGISTRY: Record<WidgetType, WidgetDefinition> = {
     label: "Allocation Drift",
     Component: AllocationDriftWidget,
     defaultSize: { w: 6, h: 9 },
+  },
+  debts: {
+    label: "Debts",
+    Component: DebtsWidget,
+    defaultSize: { w: 4, h: 9 },
+  },
+  commitments: {
+    label: "Future Commitments",
+    Component: CommitmentsWidget,
+    defaultSize: { w: 4, h: 9 },
   },
 };

@@ -37,7 +37,8 @@ export function NetWorthTrendWidget() {
       Number(s.stockValue) +
       Number(s.fundValue) +
       Number(s.cryptoValue) +
-      Number(s.otherValue),
+      Number(s.otherValue) -
+      Number(s.debtTotal ?? 0),
   }));
 
   const first = points[0]?.value;

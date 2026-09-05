@@ -75,6 +75,36 @@ export const profileUpdateSchema = z.object({
   name: z.string().trim().min(1).max(60),
 });
 
+const optionalMoney = z.coerce.number().nonnegative().optional();
+
+export const debtInsertSchema = z.object({
+  name: z.string().trim().min(1).max(60),
+  kind: z.enum(["mortgage", "car", "credit_card", "student", "personal", "business", "other"]),
+  lender: z.string().trim().max(60).optional(),
+  balance: z.coerce.number().nonnegative(),
+  originalAmount: optionalMoney,
+  interestRate: z.coerce.number().min(0).max(200).optional(),
+  monthlyPayment: optionalMoney,
+  startedOn: isoDate.optional(),
+  payoffTargetOn: isoDate.optional(),
+  note: z.string().trim().max(200).optional(),
+});
+
+export const debtUpdateSchema = debtInsertSchema.partial();
+
+export const commitmentInsertSchema = z.object({
+  name: z.string().trim().min(1).max(60),
+  category: z.enum(["education", "family", "purchase", "medical", "travel", "other"]),
+  amount: z.coerce.number().positive(),
+  dueOn: isoDate,
+  recurringYears: z.coerce.number().int().min(1).max(50).optional(),
+  certainty: z.enum(["confirmed", "likely", "possible"]).optional(),
+  fundedAmount: optionalMoney,
+  note: z.string().trim().max(200).optional(),
+});
+
+export const commitmentUpdateSchema = commitmentInsertSchema.partial();
+
 export const widgetTypeSchema = z.enum([
   "total-assets",
   "net-income",
@@ -96,6 +126,8 @@ export const widgetTypeSchema = z.enum([
   "cash-runway",
   "wishlist-targets",
   "allocation-drift",
+  "debts",
+  "commitments",
 ]);
 
 export const widgetLayoutItemSchema = z.object({

@@ -50,6 +50,13 @@
       "when": 1788588116065,
       "tag": "0006_short_epoch",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788589054454,
+      "tag": "0007_nervous_sunfire",
+      "breakpoints": true
     }
   ]
 }
