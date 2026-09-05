@@ -1,7 +1,10 @@
 import { Link } from "wouter";
 import { CalendarClock } from "lucide-react";
 
+import { CommitmentDialog } from "@/components/commitment-dialog";
+import { EmptyState } from "@/components/empty-state";
 import { Card } from "@/components/ui/card";
+import { StatSkeleton } from "@/components/ui/skeleton";
 import { useCommitments } from "@/hooks/use-commitments";
 import { useTransactions } from "@/hooks/use-transactions";
 import { formatDateShort, isInMonthOffset } from "@/lib/date-range";
@@ -51,13 +54,15 @@ export function CommitmentsWidget() {
         <p className="text-sm font-medium text-muted-foreground">Future Commitments</p>
       </div>
 
-      <div>
-        <p className="text-2xl font-semibold tabular-nums">
-          {formatCurrency(requiredMonthly)}
-          <span className="text-sm font-normal text-muted-foreground">/mo</span>
-        </p>
-        <p className="text-sm text-muted-foreground">to be ready on time</p>
-      </div>
+      {requiredMonthly > 0 && (
+        <div>
+          <p className="text-2xl font-semibold tabular-nums">
+            {formatCurrency(requiredMonthly)}
+            <span className="text-sm font-normal text-muted-foreground">/mo</span>
+          </p>
+          <p className="text-sm text-muted-foreground">to be ready on time</p>
+        </div>
+      )}
 
       {actualSaving !== undefined && requiredMonthly > 0 && (
         <p className={cn("text-xs font-medium", covered ? "text-positive" : "text-destructive")}>
@@ -68,11 +73,15 @@ export function CommitmentsWidget() {
       )}
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <StatSkeleton />
       ) : upcoming.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Nothing planned yet. Add costs you know are coming to see what to set aside.
-        </p>
+        <EmptyState
+          icon={CalendarClock}
+          title="Nothing planned yet"
+          description="Add costs you know are coming — tuition, a wedding — to see what to set aside each month."
+          action={<CommitmentDialog />}
+          className="py-4"
+        />
       ) : (
         <ul className="space-y-2">
           {upcoming.map(({ commitment, math }) => (

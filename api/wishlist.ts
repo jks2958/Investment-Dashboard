@@ -4,7 +4,10 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { wishlistItems } from "../db/schema.js";
 import { requireAuth } from "../lib/server/requireAuth.js";
-import { wishlistInsertSchema } from "../lib/server/validation.js";
+import {
+  wishlistInsertSchema,
+  wishlistUpdateSchema,
+} from "../lib/server/validation.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!requireAuth(req, res)) return;
@@ -43,6 +46,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const id = Number(idParam);
   if (!Number.isInteger(id)) {
     res.status(400).json({ error: "Invalid id" });
+    return;
+  }
+
+  if (req.method === "PATCH") {
+    const parsed = wishlistUpdateSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid input" });
+      return;
+    }
+
+    const { targetPrice, ...rest } = parsed.data;
+    const updates: Record<string, unknown> = { ...rest };
+    // Clearing a target is meaningful, so an explicit null has to survive
+    // rather than being dropped as "no change".
+    if (targetPrice !== undefined) updates.targetPrice = String(targetPrice);
+    else if (req.body?.targetPrice === null) updates.targetPrice = null;
+
+    const [updated] = await db
+      .update(wishlistItems)
+      .set(updates)
+      .where(eq(wishlistItems.id, id))
+      .returning();
+
+    if (!updated) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
+
+    res.status(200).json(updated);
     return;
   }
 

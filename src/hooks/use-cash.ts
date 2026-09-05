@@ -14,6 +14,15 @@ export function useCreateCashAccount() {
   });
 }
 
+export function useUpdateCashAccount() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: number; input: Partial<CashInput> }) =>
+      api.cash.update(id, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cash"] }),
+  });
+}
+
 export function useDeleteCashAccount() {
   const queryClient = useQueryClient();
   return useMutation({

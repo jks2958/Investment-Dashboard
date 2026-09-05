@@ -14,6 +14,15 @@ export function useCreateWishlistItem() {
   });
 }
 
+export function useUpdateWishlistItem() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: number; input: Partial<WishlistInput> }) =>
+      api.wishlist.update(id, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["wishlist"] }),
+  });
+}
+
 export function useDeleteWishlistItem() {
   const queryClient = useQueryClient();
   return useMutation({

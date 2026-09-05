@@ -59,6 +59,8 @@ export const transactionInsertSchema = z.object({
   note: z.string().trim().max(200).optional(),
 });
 
+export const transactionUpdateSchema = transactionInsertSchema.partial();
+
 export const wishlistInsertSchema = z
   .object({
     symbol: z.string().trim().min(1).max(20),
@@ -69,6 +71,26 @@ export const wishlistInsertSchema = z
   .transform((data) => ({
     ...data,
     symbol: data.assetType === "crypto" ? data.symbol.toLowerCase() : data.symbol.toUpperCase(),
+  }));
+
+/** Not derived from the insert schema with .partial(): that schema's transform
+ *  normalises the symbol's case using assetType, which a partial edit may not
+ *  carry. Spelling it out keeps the casing rule correct on its own. */
+export const wishlistUpdateSchema = z
+  .object({
+    symbol: z.string().trim().min(1).max(20).optional(),
+    assetType: z.enum(["stock", "fund", "crypto"]).optional(),
+    targetPrice: z.coerce.number().positive().optional(),
+    note: z.string().trim().max(200).optional(),
+  })
+  .transform((data) => ({
+    ...data,
+    symbol:
+      data.symbol === undefined
+        ? undefined
+        : data.assetType === "crypto"
+          ? data.symbol.toLowerCase()
+          : data.symbol.toUpperCase(),
   }));
 
 export const profileUpdateSchema = z.object({

@@ -1,8 +1,10 @@
-import { Trash2 } from "lucide-react";
+import { History } from "lucide-react";
 
 import { AddSnapshotDialog } from "@/components/add-snapshot-dialog";
-import { Button } from "@/components/ui/button";
+import { DeleteButton } from "@/components/delete-button";
+import { EmptyState } from "@/components/empty-state";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ListSkeleton } from "@/components/ui/skeleton";
 import { useAllSnapshots, useDeleteSnapshot } from "@/hooks/use-snapshots";
 import { formatDateShort, todayIso } from "@/lib/date-range";
 import { formatCurrency } from "@/lib/format";
@@ -46,11 +48,14 @@ export function NetWorthHistoryCard() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <ListSkeleton rows={4} />
         ) : rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No history yet. Add past dates to give the charts something to plot.
-          </p>
+          <EmptyState
+            icon={History}
+            title="No history yet"
+            description="Add past dates to give the trend chart and sparklines something to plot — you can paste a spreadsheet's worth at once."
+            action={<AddSnapshotDialog />}
+          />
         ) : (
           <ul className="max-h-96 divide-y divide-border overflow-auto">
             {rows.map((snapshot) => {
@@ -84,14 +89,11 @@ export function NetWorthHistoryCard() {
                     <p className="font-medium tabular-nums">
                       {formatCurrency(netWorthOf(snapshot))}
                     </p>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label={`Remove ${snapshot.snapshotDate}`}
-                      onClick={() => deleteSnapshot.mutate(snapshot.snapshotDate)}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
+                    <DeleteButton
+                      label={formatDateShort(snapshot.snapshotDate)}
+                      detail={`Net worth ${formatCurrency(netWorthOf(snapshot))}`}
+                      onConfirm={() => deleteSnapshot.mutate(snapshot.snapshotDate)}
+                    />
                   </div>
                 </li>
               );

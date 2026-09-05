@@ -1,7 +1,10 @@
 import { Link } from "wouter";
 import { Landmark } from "lucide-react";
 
+import { DebtDialog } from "@/components/debt-dialog";
+import { EmptyState } from "@/components/empty-state";
 import { Card } from "@/components/ui/card";
+import { StatSkeleton } from "@/components/ui/skeleton";
 import { useDebts } from "@/hooks/use-debts";
 import { usePortfolioTotals } from "@/hooks/use-portfolio-totals";
 import { formatCurrency } from "@/lib/format";
@@ -31,23 +34,29 @@ export function DebtsWidget() {
         <p className="text-sm font-medium text-muted-foreground">Debts</p>
       </div>
 
-      <div className="flex items-baseline gap-3">
-        <p className="text-2xl font-semibold tabular-nums text-destructive">
-          {formatCurrency(summary.totalOwed)}
-        </p>
-        {debtRatio !== undefined && summary.totalOwed > 0 && (
-          <span className="text-xs text-muted-foreground">
-            {debtRatio.toFixed(0)}% of assets
-          </span>
-        )}
-      </div>
+      {summary.totalOwed > 0 && (
+        <div className="flex items-baseline gap-3">
+          <p className="text-2xl font-semibold tabular-nums text-destructive">
+            {formatCurrency(summary.totalOwed)}
+          </p>
+          {debtRatio !== undefined && (
+            <span className="text-xs text-muted-foreground">
+              {debtRatio.toFixed(0)}% of assets
+            </span>
+          )}
+        </div>
+      )}
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <StatSkeleton />
       ) : rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Nothing owed. Add a debt to see it reflected in your net worth.
-        </p>
+        <EmptyState
+          icon={Landmark}
+          title="Nothing owed"
+          description="Add a mortgage, loan or card balance to see it subtracted from your net worth."
+          action={<DebtDialog />}
+          className="py-4"
+        />
       ) : (
         <>
           <ul className="space-y-2">

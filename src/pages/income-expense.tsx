@@ -1,4 +1,4 @@
-import { AddTransactionDialog } from "@/components/add-transaction-dialog";
+import { TransactionDialog } from "@/components/transaction-dialog";
 import { StatCard } from "@/components/stat-card";
 import { TransactionsList } from "@/components/transactions-list";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -24,7 +24,7 @@ export function IncomeExpensePage() {
       <Card>
         <CardHeader>
           <h2 className="text-base font-semibold">Transactions</h2>
-          <AddTransactionDialog />
+          <TransactionDialog />
         </CardHeader>
         <CardContent>
           <TransactionsList />

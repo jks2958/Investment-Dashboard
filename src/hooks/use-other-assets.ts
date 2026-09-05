@@ -14,6 +14,15 @@ export function useCreateOtherAsset() {
   });
 }
 
+export function useUpdateOtherAsset() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: number; input: Partial<OtherAssetInput> }) =>
+      api.otherAssets.update(id, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["other-assets"] }),
+  });
+}
+
 export function useDeleteOtherAsset() {
   const queryClient = useQueryClient();
   return useMutation({

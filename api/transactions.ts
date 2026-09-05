@@ -4,7 +4,10 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { transactions } from "../db/schema.js";
 import { requireAuth } from "../lib/server/requireAuth.js";
-import { transactionInsertSchema } from "../lib/server/validation.js";
+import {
+  transactionInsertSchema,
+  transactionUpdateSchema,
+} from "../lib/server/validation.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!requireAuth(req, res)) return;
@@ -47,6 +50,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const id = Number(idParam);
   if (!Number.isInteger(id)) {
     res.status(400).json({ error: "Invalid id" });
+    return;
+  }
+
+  if (req.method === "PATCH") {
+    const parsed = transactionUpdateSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid input" });
+      return;
+    }
+
+    const { amount, ...rest } = parsed.data;
+    const updates: Record<string, unknown> = { ...rest };
+    if (amount !== undefined) updates.amount = String(amount);
+
+    const [updated] = await db
+      .update(transactions)
+      .set(updates)
+      .where(eq(transactions.id, id))
+      .returning();
+
+    if (!updated) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
+
+    res.status(200).json(updated);
     return;
   }
 

@@ -1,7 +1,12 @@
 import * as React from "react";
+import { Link } from "wouter";
+import { LineChart } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
+import { EmptyState } from "@/components/empty-state";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { StatSkeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -72,25 +77,34 @@ export function NetWorthTrendWidget() {
         </Select>
       </div>
 
-      <div className="flex items-baseline gap-3">
-        <p className="text-2xl font-semibold tabular-nums">
-          {last !== undefined ? formatCurrency(last) : "—"}
-        </p>
-        {changeAbs !== undefined && changePct !== undefined && (
-          <span className={cn("text-xs font-medium", up ? "text-positive" : "text-destructive")}>
-            {up ? "+" : "−"}
-            {formatCurrency(Math.abs(changeAbs))} ({formatPercent(changePct)})
-          </span>
-        )}
-      </div>
+      {/* With no history the empty state below says everything; a lone "—"
+          above it reads as a rendering glitch rather than as "no data". */}
+      {last !== undefined && (
+        <div className="flex items-baseline gap-3">
+          <p className="text-2xl font-semibold tabular-nums">{formatCurrency(last)}</p>
+          {changeAbs !== undefined && changePct !== undefined && (
+            <span className={cn("text-xs font-medium", up ? "text-positive" : "text-destructive")}>
+              {up ? "+" : "−"}
+              {formatCurrency(Math.abs(changeAbs))} ({formatPercent(changePct)})
+            </span>
+          )}
+        </div>
+      )}
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <StatSkeleton />
       ) : points.length < 2 ? (
-        <p className="text-sm text-muted-foreground">
-          Not enough history yet. Your net worth is recorded once a day — check back tomorrow to
-          start seeing a trend.
-        </p>
+        <EmptyState
+          icon={LineChart}
+          title="Not enough history yet"
+          description="Net worth is recorded once a day. Backfill past dates under Account → Net worth history to see a trend straight away."
+          action={
+            <Button asChild size="sm" variant="outline">
+              <Link href="/account">Backfill history</Link>
+            </Button>
+          }
+          className="py-4"
+        />
       ) : (
         <div className="min-h-40 flex-1">
           <ResponsiveContainer width="100%" height="100%">

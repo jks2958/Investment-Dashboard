@@ -1,7 +1,7 @@
 import * as React from "react";
 
-import { AddCommitmentDialog } from "@/components/add-commitment-dialog";
-import { AddDebtDialog } from "@/components/add-debt-dialog";
+import { CommitmentDialog } from "@/components/commitment-dialog";
+import { DebtDialog } from "@/components/debt-dialog";
 import { CommitmentsList } from "@/components/commitments-list";
 import { DebtsList } from "@/components/debts-list";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -83,7 +83,7 @@ export function LiabilitiesPage() {
                 What you owe today. Subtracted from your net worth.
               </p>
             </div>
-            <AddDebtDialog />
+            <DebtDialog />
           </CardHeader>
           <CardContent className="space-y-4">
             {summary.totalOwed > 0 && (
@@ -118,7 +118,7 @@ export function LiabilitiesPage() {
                 to save.
               </p>
             </div>
-            <AddCommitmentDialog />
+            <CommitmentDialog />
           </CardHeader>
           <CardContent className="space-y-4">
             {requiredMonthly > 0 && (

@@ -1,6 +1,9 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
+import { HoldingDialog } from "@/components/holding-dialog";
 import { Card } from "@/components/ui/card";
+import { ListSkeleton } from "@/components/ui/skeleton";
 import { useHoldings } from "@/hooks/use-holdings";
 import { formatCurrency, formatPercent } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -100,13 +103,24 @@ export function GainersLosersWidget() {
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <ListSkeleton rows={3} />
       ) : priced.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          {all.length === 0
-            ? "Add holdings to track what's making and losing you money."
-            : "No live prices yet — check that your market data API key is set."}
-        </p>
+        all.length === 0 ? (
+          <EmptyState
+            icon={TrendingUp}
+            title="No holdings yet"
+            description="Add what you own to track what's making and losing you money."
+            action={<HoldingDialog />}
+            className="py-4"
+          />
+        ) : (
+          <EmptyState
+            icon={TrendingDown}
+            title="No live prices"
+            description="Holdings are there but none are priced — check that FINNHUB_API_KEY is set, and that crypto symbols use CoinGecko ids."
+            className="py-4"
+          />
+        )
       ) : (
         <div className="space-y-4">
           {gainers.length > 0 && (

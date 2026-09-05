@@ -4,6 +4,7 @@ import { GripVertical, RotateCcw, Settings2, X } from "lucide-react";
 
 import { AddWidgetDialog } from "@/components/add-widget-dialog";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useDashboardSettings, useUpdateDashboardSettings } from "@/hooks/use-dashboard-settings";
 import type { WidgetLayoutItem, WidgetType } from "@/lib/api";
 import { WIDGET_REGISTRY } from "@/lib/widget-registry";
@@ -108,7 +109,17 @@ export function DashboardGrid() {
   return (
     <div ref={containerRef}>
       {isLoading || !settings ? (
-        <p className="py-10 text-center text-sm text-muted-foreground">Loading…</p>
+        // The saved layout decides how many cards there are and how big, so
+        // until it lands the honest placeholder is a plausible grid rather
+        // than one line of text collapsing the page to nothing.
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Skeleton className="h-56 rounded-xl md:col-span-1" />
+          <Skeleton className="h-56 rounded-xl" />
+          <Skeleton className="h-56 rounded-xl" />
+          <Skeleton className="h-40 rounded-xl" />
+          <Skeleton className="h-40 rounded-xl" />
+          <Skeleton className="h-40 rounded-xl" />
+        </div>
       ) : (
         <>
           <div className="mb-4 flex flex-wrap items-center justify-end gap-2">

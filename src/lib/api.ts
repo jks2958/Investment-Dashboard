@@ -291,6 +291,8 @@ export const api = {
     list: () => request<Holding[]>("/api/holdings"),
     create: (input: HoldingInput) =>
       request<Holding>("/api/holdings", { method: "POST", body: JSON.stringify(input) }),
+    update: (id: number, input: Partial<HoldingInput>) =>
+      request<Holding>(`/api/holdings/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
     remove: (id: number) => request<void>(`/api/holdings/${id}`, { method: "DELETE" }),
   },
 
@@ -298,6 +300,8 @@ export const api = {
     list: () => request<CashAccount[]>("/api/cash"),
     create: (input: CashInput) =>
       request<CashAccount>("/api/cash", { method: "POST", body: JSON.stringify(input) }),
+    update: (id: number, input: Partial<CashInput>) =>
+      request<CashAccount>(`/api/cash/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
     remove: (id: number) => request<void>(`/api/cash/${id}`, { method: "DELETE" }),
   },
 
@@ -305,6 +309,8 @@ export const api = {
     list: () => request<OtherAsset[]>("/api/other-assets"),
     create: (input: OtherAssetInput) =>
       request<OtherAsset>("/api/other-assets", { method: "POST", body: JSON.stringify(input) }),
+    update: (id: number, input: Partial<OtherAssetInput>) =>
+      request<OtherAsset>(`/api/other-assets/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
     remove: (id: number) => request<void>(`/api/other-assets/${id}`, { method: "DELETE" }),
   },
 
@@ -312,6 +318,8 @@ export const api = {
     list: () => request<Transaction[]>("/api/transactions"),
     create: (input: TransactionInput) =>
       request<Transaction>("/api/transactions", { method: "POST", body: JSON.stringify(input) }),
+    update: (id: number, input: Partial<TransactionInput>) =>
+      request<Transaction>(`/api/transactions/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
     remove: (id: number) => request<void>(`/api/transactions/${id}`, { method: "DELETE" }),
   },
 
@@ -319,6 +327,8 @@ export const api = {
     list: () => request<WishlistItem[]>("/api/wishlist"),
     create: (input: WishlistInput) =>
       request<WishlistItem>("/api/wishlist", { method: "POST", body: JSON.stringify(input) }),
+    update: (id: number, input: Partial<WishlistInput>) =>
+      request<WishlistItem>(`/api/wishlist/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
     remove: (id: number) => request<void>(`/api/wishlist/${id}`, { method: "DELETE" }),
   },
 

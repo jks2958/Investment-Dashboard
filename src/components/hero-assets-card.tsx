@@ -8,6 +8,7 @@ import {
   formatInCurrency,
   getMoneyConfig,
 } from "@/lib/format";
+import type { PriceAge } from "@/lib/price-freshness";
 import { cn } from "@/lib/utils";
 
 export function HeroAssetsCard({
@@ -16,12 +17,15 @@ export function HeroAssetsCard({
   investmentsValue,
   otherValue = 0,
   skin = "gold",
+  priceAge,
 }: {
   totalAssets: number;
   cashValue: number;
   investmentsValue: number;
   otherValue?: number;
   skin?: CardSkin;
+  /** How old the oldest market price behind this figure is. */
+  priceAge?: PriceAge;
 }) {
   const pct = (value: number) => (totalAssets > 0 ? (value / totalAssets) * 100 : 0);
   const def = CARD_SKINS[skin];
@@ -53,7 +57,17 @@ export function HeroAssetsCard({
     >
       <div className="flex h-full flex-col justify-between">
         <div className="flex items-start justify-between">
-          <p className="text-sm font-medium opacity-90">Total Assets</p>
+          <div>
+            <p className="text-sm font-medium opacity-90">Total Assets</p>
+            {/* Whether this number is four minutes or four days old changes
+                what you'd do with it, so it says which. */}
+            {priceAge && (
+              <p className="text-xs opacity-70">
+                {priceAge.stale ? "prices stale · " : "prices "}
+                {priceAge.label}
+              </p>
+            )}
+          </div>
           <span
             className={cn(
               "flex size-9 items-center justify-center rounded-full",

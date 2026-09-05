@@ -1,7 +1,7 @@
 import * as React from "react";
 
-import { AddCashDialog } from "@/components/add-cash-dialog";
-import { AddOtherAssetDialog } from "@/components/add-other-asset-dialog";
+import { CashDialog } from "@/components/cash-dialog";
+import { OtherAssetDialog } from "@/components/other-asset-dialog";
 import { CashList } from "@/components/cash-list";
 import { NetWorthHistoryCard } from "@/components/net-worth-history-card";
 import { OtherAssetsList } from "@/components/other-assets-list";
@@ -50,7 +50,7 @@ export function AccountPage() {
       <Card>
         <CardHeader>
           <h2 className="text-base font-semibold">Cash accounts</h2>
-          <AddCashDialog />
+          <CashDialog />
         </CardHeader>
         <CardContent>
           <CashList />
@@ -60,7 +60,7 @@ export function AccountPage() {
       <Card>
         <CardHeader>
           <h2 className="text-base font-semibold">Other assets</h2>
-          <AddOtherAssetDialog />
+          <OtherAssetDialog />
         </CardHeader>
         <CardContent>
           <OtherAssetsList />

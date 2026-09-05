@@ -1,7 +1,10 @@
 import { Link } from "wouter";
 import { LifeBuoy } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
+import { TransactionDialog } from "@/components/transaction-dialog";
 import { Card } from "@/components/ui/card";
+import { StatSkeleton } from "@/components/ui/skeleton";
 import { useCashAccounts } from "@/hooks/use-cash";
 import { useTransactions } from "@/hooks/use-transactions";
 import { isInMonthOffset } from "@/lib/date-range";
@@ -51,11 +54,15 @@ export function CashRunwayWidget() {
       </div>
 
       {cashLoading || txLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <StatSkeleton />
       ) : runway === undefined ? (
-        <p className="text-sm text-muted-foreground">
-          Log some expenses to see how long your cash would last.
-        </p>
+        <EmptyState
+          icon={LifeBuoy}
+          title="Not enough to measure"
+          description="Log a month of expenses and this shows how long your cash would cover them."
+          action={<TransactionDialog />}
+          className="py-4"
+        />
       ) : (
         <>
           <div>

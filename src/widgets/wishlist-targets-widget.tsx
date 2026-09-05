@@ -1,7 +1,10 @@
 import { Link } from "wouter";
 import { Target } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
+import { WishlistDialog } from "@/components/wishlist-dialog";
 import { Card } from "@/components/ui/card";
+import { ListSkeleton } from "@/components/ui/skeleton";
 import { usePrices } from "@/hooks/use-prices";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { formatCurrency } from "@/lib/format";
@@ -49,11 +52,15 @@ export function WishlistTargetsWidget() {
       )}
 
       {wishlistLoading || pricesLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <ListSkeleton rows={3} />
       ) : rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Add a target price to a wishlist item to track how close it is.
-        </p>
+        <EmptyState
+          icon={Target}
+          title="No targets set"
+          description="Give a wishlist item a target buy price and this tracks how far the market is from it."
+          action={<WishlistDialog />}
+          className="py-4"
+        />
       ) : (
         <ul className="space-y-3">
           {rows.map(({ item, target, price, gapPct, reached }) => (

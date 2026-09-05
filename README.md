@@ -69,6 +69,52 @@ date is a record of when you acquired something — it does not rewrite past
 `net_worth_snapshots`, which only accumulate from the day you start using the
 app.
 
+## Editing and deleting
+
+Every record type — holdings, cash accounts, other assets, transactions,
+wishlist items, debts, commitments — can be **edited** from its row (the pencil
+button) as well as added and deleted. One component serves both jobs: pass
+`editing` and the form fills from that record and PATCHes it, omit it and the
+same form POSTs a new one. `FormDialog` in `src/components/form-dialog.tsx`
+carries the shared chrome and the open-state contract that lets a dialog either
+own its own "Add" button or be opened by a row (or the command palette).
+
+**Deletes always confirm**, via `DeleteButton`. There is no undo behind them,
+and on a tablet the trash icon sits a thumb's width from the row's value — so
+the confirmation names the record and what's lost with it rather than asking
+"are you sure?".
+
+## Header
+
+The search box opens a **command palette** (`⌘K` / `Ctrl-K`): it searches your
+own holdings, wishlist and accounts, jumps to any page, and starts an entry via
+the same dialogs the pages use. The **bell** shows real alerts derived from data
+already loaded — a wishlist target reached, a commitment due within 90 days and
+underfunded, prices that have gone stale, holdings the provider couldn't price —
+so opening it costs no extra requests. Nothing is dismissable per-item: each
+alert clears when the situation does.
+
+## Loading, empty and stale states
+
+Lists and widgets show **skeletons** shaped like their content rather than a
+"Loading…" line, so the grid doesn't jump as queries land one at a time (Neon
+cold starts make that window visible).
+
+**Empty states** carry a reason and their own primary action, because the "Add"
+button in a card header reads as chrome rather than as the answer to an empty
+list. A brand-new database also gets a **setup checklist** on the dashboard —
+cash → holdings → transactions, the order that makes the rest of the app light
+up — which hides itself once all three are done. Dismissing it early is stored
+in `localStorage`, deliberately not in `dashboard_settings`: it's a nudge, not a
+preference worth a round-trip.
+
+Market prices are cached server-side and refreshed when older than 15 minutes,
+so a price much older than that means a lookup is failing quietly. The Total
+Assets card carries an always-on "prices <age>" line for the portfolio as a
+whole (the oldest price in it, since one stale row makes the total wrong), and
+individual holding rows call it out only when stale — a fresh "5m ago" on every
+row is noise.
+
 ## Currency
 
 Every amount is **stored in USD** — market data arrives in USD and keeping one
@@ -185,7 +231,7 @@ overwritten. Past rows are never touched by the daily write.
 - `src/widgets` — self-contained dashboard widget components (each fetches its own data)
 - `src/lib/widget-registry.tsx` — widget type → component/default-size registry
 - `src/hooks` — TanStack Query hooks (holdings, cash, other assets, transactions, wishlist, profile, snapshots, dashboard settings)
-- `src/lib` — auth context, theme, query client, API client, formatting, category icons
+- `src/lib` — auth context, theme, query client, API client, formatting, category icons, price freshness, alert derivation
 - `api/` — Vercel serverless functions (holdings, cash, other-assets, transactions, wishlist, profile, snapshots, prices, dashboard-settings, auth)
 - `lib/server` — session/auth helpers, market data fetchers, portfolio value math, zod validation
 - `db/` — Drizzle schema, DB client, migrations

@@ -1,6 +1,10 @@
 import { Link } from "wouter";
+import { Receipt } from "lucide-react";
 
+import { EmptyState } from "@/components/empty-state";
+import { TransactionDialog } from "@/components/transaction-dialog";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ListSkeleton } from "@/components/ui/skeleton";
 import { useTransactions } from "@/hooks/use-transactions";
 import { iconForCategory } from "@/lib/category-icons";
 import { formatCurrency } from "@/lib/format";
@@ -19,9 +23,14 @@ export function TransactionsWidget() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <ListSkeleton rows={4} />
         ) : rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No transactions yet.</p>
+          <EmptyState
+            icon={Receipt}
+            title="No transactions yet"
+            description="Log income and expenses to drive net income, the expense breakdown and your cash runway."
+            action={<TransactionDialog />}
+          />
         ) : (
           <ul className="divide-y divide-border">
             {rows.map((t) => {

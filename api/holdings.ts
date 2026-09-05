@@ -25,6 +25,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           quantity: holdings.quantity,
           avgCostBasis: holdings.avgCostBasis,
           account: holdings.account,
+          acquiredOn: holdings.acquiredOn,
           lastPrice: priceCache.lastPrice,
           priceFetchedAt: priceCache.fetchedAt,
         })

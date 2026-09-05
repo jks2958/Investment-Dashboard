@@ -14,6 +14,15 @@ export function useCreateHolding() {
   });
 }
 
+export function useUpdateHolding() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: number; input: Partial<HoldingInput> }) =>
+      api.holdings.update(id, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["holdings"] }),
+  });
+}
+
 export function useDeleteHolding() {
   const queryClient = useQueryClient();
   return useMutation({
