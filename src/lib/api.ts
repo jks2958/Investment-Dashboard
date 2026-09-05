@@ -182,6 +182,17 @@ export type NetWorthSnapshot = {
   totalInvested: string;
 };
 
+/** One backfilled history row. */
+export type SnapshotEntry = {
+  snapshotDate: string;
+  cashValue: number;
+  stockValue: number;
+  fundValue: number;
+  cryptoValue: number;
+  otherValue: number;
+  debtTotal: number;
+};
+
 export type DebtKind =
   | "mortgage"
   | "car"
@@ -315,6 +326,15 @@ export const api = {
       request<NetWorthSnapshot[]>(
         days === undefined ? "/api/snapshots" : `/api/snapshots?days=${days}`,
       ),
+    listAll: () => request<NetWorthSnapshot[]>("/api/snapshots?all=1"),
+    /** Backfill. Always an array so one row and a bulk paste share a path. */
+    save: (entries: SnapshotEntry[]) =>
+      request<{ ok: true; count: number }>("/api/snapshots", {
+        method: "POST",
+        body: JSON.stringify(entries),
+      }),
+    remove: (date: string) =>
+      request<void>(`/api/snapshots/${date}`, { method: "DELETE" }),
   },
 
   prices: {

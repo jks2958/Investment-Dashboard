@@ -75,6 +75,20 @@ export const profileUpdateSchema = z.object({
   name: z.string().trim().min(1).max(60),
 });
 
+/** A backfilled net-worth row. totalInvested isn't asked for — nothing reads
+ *  it back, so manual entries record it as 0. */
+export const snapshotEntrySchema = z.object({
+  snapshotDate: isoDate,
+  cashValue: z.coerce.number().nonnegative(),
+  stockValue: z.coerce.number().nonnegative(),
+  fundValue: z.coerce.number().nonnegative(),
+  cryptoValue: z.coerce.number().nonnegative(),
+  otherValue: z.coerce.number().nonnegative(),
+  debtTotal: z.coerce.number().nonnegative(),
+});
+
+export const snapshotBulkSchema = z.array(snapshotEntrySchema).min(1).max(400);
+
 const optionalMoney = z.coerce.number().nonnegative().optional();
 
 export const debtInsertSchema = z.object({

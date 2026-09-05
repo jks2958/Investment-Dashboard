@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { api } from "@/lib/api";
+import { api, type SnapshotEntry } from "@/lib/api";
 
 export function useSnapshots() {
   return useQuery({ queryKey: ["snapshots"], queryFn: () => api.snapshots.list() });
@@ -13,5 +13,30 @@ export function useSnapshotRange(days: number) {
   return useQuery({
     queryKey: ["snapshots", days],
     queryFn: () => api.snapshots.list(days),
+  });
+}
+
+export function useAllSnapshots() {
+  return useQuery({ queryKey: ["snapshots", "all"], queryFn: api.snapshots.listAll });
+}
+
+/** Backfilling changes every chart that reads history, so drop the lot. */
+function invalidateSnapshots(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({ queryKey: ["snapshots"] });
+}
+
+export function useSaveSnapshots() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (entries: SnapshotEntry[]) => api.snapshots.save(entries),
+    onSuccess: () => invalidateSnapshots(queryClient),
+  });
+}
+
+export function useDeleteSnapshot() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (date: string) => api.snapshots.remove(date),
+    onSuccess: () => invalidateSnapshots(queryClient),
   });
 }

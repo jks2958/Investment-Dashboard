@@ -15,6 +15,7 @@
       "destination": "/api/liabilities?kind=commitment&id=:id"
     },
     { "source": "/api/commitments", "destination": "/api/liabilities?kind=commitment" },
+    { "source": "/api/snapshots/:date", "destination": "/api/snapshots?date=:date" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [

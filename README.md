@@ -134,9 +134,18 @@ A new type also needs adding to `WidgetType` in `src/lib/api.ts` and
 `widgetTypeSchema` in `lib/server/validation.ts`, which are mirrored by hand.
 
 Sparklines, the "vs last month" deltas and the Net Worth Trend chart are driven
-by a daily `net_worth_snapshots` table that self-records on each dashboard load
-— history accumulates the more the app is used; there's no synthetic backfill,
-so the trend chart needs a couple of days before it has a line to draw.
+by a daily `net_worth_snapshots` table that self-records on each dashboard load.
+
+History can also be entered by hand, under **Account → Net worth history** —
+either one date at a time or by pasting rows (`date, cash, stocks, funds,
+crypto, other, debt`; a header row is ignored and commas or tabs both work, so
+a spreadsheet copy-paste goes straight in). Backfilled figures are your own
+recorded numbers rather than a reconstruction, which matters because there's no
+historical price data to value past holdings with.
+
+Backfill is limited to dates before today: today's row is recomputed from live
+holdings on every dashboard load, so a hand-typed value for it would just be
+overwritten. Past rows are never touched by the daily write.
 
 ## Where things live
 

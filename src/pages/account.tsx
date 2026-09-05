@@ -3,6 +3,7 @@ import * as React from "react";
 import { AddCashDialog } from "@/components/add-cash-dialog";
 import { AddOtherAssetDialog } from "@/components/add-other-asset-dialog";
 import { CashList } from "@/components/cash-list";
+import { NetWorthHistoryCard } from "@/components/net-worth-history-card";
 import { OtherAssetsList } from "@/components/other-assets-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -65,6 +66,8 @@ export function AccountPage() {
           <OtherAssetsList />
         </CardContent>
       </Card>
+
+      <NetWorthHistoryCard />
     </div>
   );
 }
