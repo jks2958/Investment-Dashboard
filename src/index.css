@@ -171,3 +171,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* react-grid-layout's resize handle is hover-only and has no touch-action,
+   so on touchscreens it's invisible and the browser's scroll/zoom gesture
+   can hijack a drag mid-resize, leaving the drop placeholder stuck. Make
+   the handle always visible and disable native touch gestures on it and
+   on our own drag handle so touch resizing/dragging completes cleanly. */
+.react-grid-item > .react-resizable-handle {
+  opacity: 1;
+  touch-action: none;
+  width: 26px;
+  height: 26px;
+}
+
+.widget-drag-handle {
+  touch-action: none;
+}
