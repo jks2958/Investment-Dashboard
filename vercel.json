@@ -1,7 +1,15 @@
 {
   "buildCommand": "npm run db:migrate && npm run build",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }],
+  "rewrites": [
+    { "source": "/api/holdings/:id", "destination": "/api/holdings?id=:id" },
+    { "source": "/api/cash/:id", "destination": "/api/cash?id=:id" },
+    { "source": "/api/other-assets/:id", "destination": "/api/other-assets?id=:id" },
+    { "source": "/api/wishlist/:id", "destination": "/api/wishlist?id=:id" },
+    { "source": "/api/transactions/:id", "destination": "/api/transactions?id=:id" },
+    { "source": "/api/auth/:action", "destination": "/api/auth?action=:action" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
