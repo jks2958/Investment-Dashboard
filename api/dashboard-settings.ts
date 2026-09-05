@@ -6,10 +6,13 @@ import { dashboardSettings } from "../db/schema.js";
 import {
   DEFAULT_ACCENT,
   DEFAULT_CARD_SKIN,
+  DEFAULT_CURRENCY,
   DEFAULT_LAYOUT_LG,
   DEFAULT_LAYOUT_MD,
   DEFAULT_TARGETS,
+  DEFAULT_USD_PKR_RATE,
 } from "../lib/server/dashboardDefaults.js";
+import { fetchUsdPkrRate } from "../lib/server/fx.js";
 import { requireAuth } from "../lib/server/requireAuth.js";
 import { dashboardSettingsUpdateSchema } from "../lib/server/validation.js";
 
@@ -28,6 +31,8 @@ async function getOrCreateSettings() {
       accent: DEFAULT_ACCENT,
       cardSkin: DEFAULT_CARD_SKIN,
       targets: DEFAULT_TARGETS,
+      currency: DEFAULT_CURRENCY,
+      usdPkrRate: String(DEFAULT_USD_PKR_RATE),
     })
     .onConflictDoNothing()
     .returning();
@@ -56,9 +61,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     await getOrCreateSettings();
 
-    const { reset, layoutLg, layoutMd, accent, cardSkin, targets } = parsed.data;
-    // Reset restores the default widget layout only — accent, card skin and
-    // allocation targets are user preferences, not layout.
+    const { reset, layoutLg, layoutMd, accent, cardSkin, targets, currency, usdPkrRate, refreshRate } =
+      parsed.data;
+
+    // A failed lookup leaves the stored rate alone rather than erroring — it
+    // stays editable by hand, so a flaky FX API can't block the setting.
+    const fetchedRate = refreshRate ? await fetchUsdPkrRate() : undefined;
+
+    // Reset restores the default widget layout only — accent, card skin,
+    // targets and currency are user preferences, not layout.
     const updates = reset
       ? { layoutLg: DEFAULT_LAYOUT_LG, layoutMd: DEFAULT_LAYOUT_MD }
       : {
@@ -67,6 +78,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           ...(accent !== undefined ? { accent } : {}),
           ...(cardSkin !== undefined ? { cardSkin } : {}),
           ...(targets !== undefined ? { targets } : {}),
+          ...(currency !== undefined ? { currency } : {}),
+          ...(usdPkrRate !== undefined ? { usdPkrRate: String(usdPkrRate) } : {}),
+          ...(fetchedRate !== undefined ? { usdPkrRate: String(fetchedRate) } : {}),
         };
 
     const [updated] = await db

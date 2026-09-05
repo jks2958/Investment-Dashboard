@@ -60,6 +60,17 @@ export function SettingsPage() {
     });
   }, [savedTargets]);
 
+  const currency = dashboardSettings?.currency ?? "USD";
+  const savedRate = dashboardSettings?.usdPkrRate;
+  const [rateDraft, setRateDraft] = React.useState("");
+
+  React.useEffect(() => {
+    if (savedRate !== undefined) setRateDraft(String(Number(savedRate)));
+  }, [savedRate]);
+
+  const rateChanged =
+    rateDraft !== "" && Number(rateDraft) > 0 && Number(rateDraft) !== Number(savedRate);
+
   const targets = targetDraft ?? EMPTY_TARGETS;
   const targetTotal = TARGET_KEYS.reduce((sum, t) => sum + (Number(targets[t.key]) || 0), 0);
   // 100% is a complete mix; 0% clears the targets and hides the drift widget's
@@ -177,6 +188,65 @@ export function SettingsPage() {
               );
             })}
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <h2 className="text-base font-semibold">Currency</h2>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Amounts are always stored in USD — this converts them for display. The Total Assets
+            card shows both regardless.
+          </p>
+
+          <div className="flex items-center gap-2">
+            {(["USD", "PKR"] as const).map((value) => (
+              <Button
+                key={value}
+                size="sm"
+                variant={currency === value ? "default" : "outline"}
+                onClick={() => updateDashboardSettings.mutate({ currency: value })}
+              >
+                {value}
+              </Button>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="w-40 space-y-1.5">
+              <Label htmlFor="usdPkrRate">1 USD in PKR</Label>
+              <Input
+                id="usdPkrRate"
+                type="number"
+                step="any"
+                min="0"
+                value={rateDraft}
+                onChange={(e) => setRateDraft(e.target.value)}
+              />
+            </div>
+            <Button
+              variant="outline"
+              disabled={!rateChanged || updateDashboardSettings.isPending}
+              onClick={() =>
+                updateDashboardSettings.mutate({ usdPkrRate: Number(rateDraft) || 0 })
+              }
+            >
+              Save rate
+            </Button>
+            <Button
+              variant="outline"
+              disabled={updateDashboardSettings.isPending}
+              onClick={() => updateDashboardSettings.mutate({ refreshRate: true })}
+            >
+              {updateDashboardSettings.isPending ? "Fetching…" : "Fetch latest"}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            "Fetch latest" pulls today's rate. If the lookup fails the saved rate is kept, so you
+            can always just type one.
+          </p>
         </CardContent>
       </Card>
 

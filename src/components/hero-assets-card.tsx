@@ -1,7 +1,13 @@
 import { CreditCard } from "lucide-react";
 
 import { CARD_SKINS, type CardSkin } from "@/lib/card-skins";
-import { formatCurrency } from "@/lib/format";
+import {
+  convertFromUsd,
+  formatCompactCurrency,
+  formatCurrency,
+  formatInCurrency,
+  getMoneyConfig,
+} from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export function HeroAssetsCard({
@@ -19,6 +25,17 @@ export function HeroAssetsCard({
 }) {
   const pct = (value: number) => (totalAssets > 0 ? (value / totalAssets) * 100 : 0);
   const def = CARD_SKINS[skin];
+  // Always show the total in both currencies — whichever isn't the active one
+  // goes underneath as the equivalent.
+  const money = getMoneyConfig();
+  const secondaryCurrency = money.currency === "PKR" ? "USD" : "PKR";
+
+  // Three columns of a seven-figure number overflow the card — PKR amounts are
+  // ~280x their USD equivalent — so anything past a million goes compact.
+  const statText = (value: number) =>
+    Math.abs(convertFromUsd(value, money.currency, money.usdPkrRate)) >= 1_000_000
+      ? formatCompactCurrency(value)
+      : formatCurrency(value);
 
   const stats = [
     { label: "Cash", value: cashValue },
@@ -47,13 +64,16 @@ export function HeroAssetsCard({
           </span>
         </div>
 
-        <p className="text-4xl font-semibold tracking-tight">{formatCurrency(totalAssets)}</p>
+        <div>
+          <p className="text-4xl font-semibold tracking-tight">{formatCurrency(totalAssets)}</p>
+          <p className="mt-1 text-sm opacity-75">{formatInCurrency(totalAssets, secondaryCurrency)}</p>
+        </div>
 
         <div className="flex justify-between gap-4">
           {stats.map((stat) => (
             <div key={stat.label}>
               <p className="text-sm opacity-80">{stat.label}</p>
-              <p className="text-lg font-semibold">{formatCurrency(stat.value)}</p>
+              <p className="text-lg font-semibold">{statText(stat.value)}</p>
               <p className="text-xs opacity-70">{pct(stat.value).toFixed(1)}%</p>
             </div>
           ))}

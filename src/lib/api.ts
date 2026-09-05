@@ -1,4 +1,5 @@
 import type { CardSkin } from "@/lib/card-skins";
+import type { Currency } from "@/lib/format";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
@@ -152,6 +153,9 @@ export type DashboardSettings = {
   accent: Accent;
   cardSkin: CardSkin;
   targets: AllocationTargets;
+  currency: Currency;
+  /** Stored as a numeric string, like every other money column. */
+  usdPkrRate: string;
 };
 
 export type DashboardSettingsUpdate = {
@@ -160,6 +164,9 @@ export type DashboardSettingsUpdate = {
   accent?: Accent;
   cardSkin?: CardSkin;
   targets?: AllocationTargets;
+  currency?: Currency;
+  usdPkrRate?: number;
+  refreshRate?: boolean;
   reset?: boolean;
 };
 

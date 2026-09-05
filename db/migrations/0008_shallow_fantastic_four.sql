@@ -1,0 +1,2 @@
+ALTER TABLE "dashboard_settings" ADD COLUMN "currency" text DEFAULT 'USD' NOT NULL;--> statement-breakpoint
+ALTER TABLE "dashboard_settings" ADD COLUMN "usd_pkr_rate" numeric(12, 4) DEFAULT '280' NOT NULL;

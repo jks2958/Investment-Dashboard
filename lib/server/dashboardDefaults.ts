@@ -2,6 +2,10 @@ import type { AllocationTargets, WidgetLayoutItem } from "../../db/schema.js";
 
 export const DEFAULT_ACCENT = "forest";
 export const DEFAULT_CARD_SKIN = "forest";
+export const DEFAULT_CURRENCY = "USD";
+
+/** A starting point only — refreshed from the FX API, or set by hand. */
+export const DEFAULT_USD_PKR_RATE = 280;
 
 /** All zeroes: the drift widget treats this as "no targets set yet". */
 export const DEFAULT_TARGETS: AllocationTargets = {

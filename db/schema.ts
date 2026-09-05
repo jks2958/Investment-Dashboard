@@ -193,6 +193,11 @@ export const dashboardSettings = pgTable("dashboard_settings", {
   layoutMd: jsonb("layout_md").$type<WidgetLayoutItem[]>().notNull(),
   accent: text("accent").notNull().default("orange"),
   cardSkin: text("card_skin").notNull().default("gold"),
+  /* Every amount is stored in USD; this only controls display. */
+  currency: text("currency").notNull().default("USD"),
+  usdPkrRate: numeric("usd_pkr_rate", { precision: 12, scale: 4 })
+    .notNull()
+    .default("280"),
   targets: jsonb("targets")
     .$type<AllocationTargets>()
     .notNull()

@@ -57,6 +57,13 @@
       "when": 1788589054454,
       "tag": "0007_nervous_sunfire",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788609998134,
+      "tag": "0008_shallow_fantastic_four",
+      "breakpoints": true
     }
   ]
 }

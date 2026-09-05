@@ -69,6 +69,25 @@ date is a record of when you acquired something — it does not rewrite past
 `net_worth_snapshots`, which only accumulate from the day you start using the
 app.
 
+## Currency
+
+Every amount is **stored in USD** — market data arrives in USD and keeping one
+storage currency avoids re-denominating history whenever a rate moves. The
+`currency` setting only affects display, converting at the stored
+`usd_pkr_rate`. The Total Assets card always shows both, with the inactive
+currency underneath as the equivalent.
+
+The rate is editable by hand and can be refreshed from open.er-api.com (free,
+no key) via **Settings → Currency → Fetch latest**. A failed lookup leaves the
+stored rate alone rather than erroring, so a flaky FX API can never block the
+setting or blank out the dashboard.
+
+`formatCurrency` reads a module-level config rather than taking the currency as
+an argument, which keeps its signature intact across ~80 call sites. Since that
+alone re-renders nothing, `CurrencyBridge` in `App.tsx` keys the app subtree on
+the currency and rate so a change remounts it — the query cache lives outside
+the remount, so nothing is refetched.
+
 ## Debts vs. commitments
 
 These are two different things and the app keeps them apart on purpose:
@@ -91,8 +110,8 @@ tuition is one row rather than four.
 Note that ongoing family support is a *recurring expense*, not a commitment —
 commitments are dated, finite costs.
 - **Settings** — theme (light/dark), accent color preset, Total Assets card
-  skin, target allocation (the mix the Allocation Drift widget compares
-  against), change passphrase.
+  skin, display currency and USD→PKR rate, target allocation (the mix the
+  Allocation Drift widget compares against), change passphrase.
 
 ## Customizable dashboard
 

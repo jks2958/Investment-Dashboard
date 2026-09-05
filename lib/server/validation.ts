@@ -186,11 +186,17 @@ export const allocationTargetsSchema = z
     "Target allocation cannot add up to more than 100%",
   );
 
+export const currencySchema = z.enum(["USD", "PKR"]);
+
 export const dashboardSettingsUpdateSchema = z.object({
   layoutLg: z.array(widgetLayoutItemSchema).max(60).optional(),
   layoutMd: z.array(widgetLayoutItemSchema).max(60).optional(),
   accent: accentSchema.optional(),
   cardSkin: cardSkinSchema.optional(),
   targets: allocationTargetsSchema.optional(),
+  currency: currencySchema.optional(),
+  usdPkrRate: z.coerce.number().positive().max(100000).optional(),
+  /** Pull today's rate from the FX API instead of typing one. */
+  refreshRate: z.boolean().optional(),
   reset: z.boolean().optional(),
 });
