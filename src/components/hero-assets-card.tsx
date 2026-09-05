@@ -29,7 +29,7 @@ export function HeroAssetsCard({
   return (
     <div
       className={cn(
-        "relative aspect-[1.586/1] w-full max-w-sm overflow-hidden rounded-[28px] p-6 shadow-lg",
+        "relative h-full w-full overflow-hidden rounded-[28px] p-6 shadow-lg",
         def.textClass,
       )}
       style={{ background: def.gradient }}
