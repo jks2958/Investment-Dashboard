@@ -11,17 +11,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateCashAccount } from "@/hooks/use-cash";
+import { todayIso } from "@/lib/date-range";
 
 export function AddCashDialog() {
   const [open, setOpen] = React.useState(false);
   const [name, setName] = React.useState("");
   const [balance, setBalance] = React.useState("");
+  const [acquiredOn, setAcquiredOn] = React.useState(todayIso());
   const [error, setError] = React.useState<string | null>(null);
   const create = useCreateCashAccount();
 
   function reset() {
     setName("");
     setBalance("");
+    setAcquiredOn(todayIso());
     setError(null);
   }
 
@@ -29,7 +32,11 @@ export function AddCashDialog() {
     e.preventDefault();
     setError(null);
     try {
-      await create.mutateAsync({ name, balance: Number(balance) });
+      await create.mutateAsync({
+        name,
+        balance: Number(balance),
+        ...(acquiredOn ? { acquiredOn } : {}),
+      });
       reset();
       setOpen(false);
     } catch (err) {
@@ -75,6 +82,16 @@ export function AddCashDialog() {
               value={balance}
               onChange={(e) => setBalance(e.target.value)}
               required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="cashAcquiredOn">Opened on</Label>
+            <Input
+              id="cashAcquiredOn"
+              type="date"
+              max={todayIso()}
+              value={acquiredOn}
+              onChange={(e) => setAcquiredOn(e.target.value)}
             />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}

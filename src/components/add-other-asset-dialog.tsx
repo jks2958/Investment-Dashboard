@@ -11,17 +11,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateOtherAsset } from "@/hooks/use-other-assets";
+import { todayIso } from "@/lib/date-range";
 
 export function AddOtherAssetDialog() {
   const [open, setOpen] = React.useState(false);
   const [name, setName] = React.useState("");
   const [value, setValue] = React.useState("");
+  const [acquiredOn, setAcquiredOn] = React.useState(todayIso());
   const [error, setError] = React.useState<string | null>(null);
   const create = useCreateOtherAsset();
 
   function reset() {
     setName("");
     setValue("");
+    setAcquiredOn(todayIso());
     setError(null);
   }
 
@@ -29,7 +32,11 @@ export function AddOtherAssetDialog() {
     e.preventDefault();
     setError(null);
     try {
-      await create.mutateAsync({ name, value: Number(value) });
+      await create.mutateAsync({
+        name,
+        value: Number(value),
+        ...(acquiredOn ? { acquiredOn } : {}),
+      });
       reset();
       setOpen(false);
     } catch (err) {
@@ -75,6 +82,16 @@ export function AddOtherAssetDialog() {
               value={value}
               onChange={(e) => setValue(e.target.value)}
               required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="assetAcquiredOn">Acquired on</Label>
+            <Input
+              id="assetAcquiredOn"
+              type="date"
+              max={todayIso()}
+              value={acquiredOn}
+              onChange={(e) => setAcquiredOn(e.target.value)}
             />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}

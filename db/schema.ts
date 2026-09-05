@@ -39,10 +39,14 @@ export const transactionTypeEnum = pgEnum("transaction_type", [
   "expense",
 ]);
 
+// acquiredOn is the user-supplied date the asset was actually acquired (or the
+// account opened), so assets can be entered retrospectively. Nullable: rows
+// created before this existed have no date, and it stays optional.
 export const cashAccounts = pgTable("cash_accounts", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   name: text("name").notNull(),
   balance: numeric("balance", { precision: 18, scale: 2 }).notNull(),
+  acquiredOn: date("acquired_on"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -50,6 +54,7 @@ export const otherAssets = pgTable("other_assets", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   name: text("name").notNull(),
   value: numeric("value", { precision: 18, scale: 2 }).notNull(),
+  acquiredOn: date("acquired_on"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -63,6 +68,7 @@ export const holdings = pgTable("holdings", {
     scale: 8,
   }).notNull(),
   account: text("account"),
+  acquiredOn: date("acquired_on"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

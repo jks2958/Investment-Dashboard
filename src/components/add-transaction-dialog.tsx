@@ -19,10 +19,7 @@ import {
 } from "@/components/ui/select";
 import { useCreateTransaction } from "@/hooks/use-transactions";
 import type { TransactionType } from "@/lib/api";
-
-function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
-}
+import { todayIso } from "@/lib/date-range";
 
 export function AddTransactionDialog() {
   const [open, setOpen] = React.useState(false);

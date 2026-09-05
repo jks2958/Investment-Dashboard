@@ -2,6 +2,7 @@ import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useDeleteOtherAsset, useOtherAssets } from "@/hooks/use-other-assets";
+import { formatDateShort } from "@/lib/date-range";
 import { formatCurrency } from "@/lib/format";
 
 export function OtherAssetsList() {
@@ -20,7 +21,14 @@ export function OtherAssetsList() {
     <ul className="divide-y divide-border">
       {assets.map((a) => (
         <li key={a.id} className="flex items-center justify-between gap-3 py-3">
-          <p className="font-medium">{a.name}</p>
+          <div className="min-w-0">
+            <p className="font-medium">{a.name}</p>
+            {a.acquiredOn && (
+              <p className="text-xs text-muted-foreground">
+                Acquired {formatDateShort(a.acquiredOn)}
+              </p>
+            )}
+          </div>
           <div className="flex items-center gap-3">
             <p className="font-medium tabular-nums">{formatCurrency(Number(a.value))}</p>
             <Button

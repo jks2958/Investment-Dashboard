@@ -3,6 +3,7 @@ import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDeleteHolding, useHoldings } from "@/hooks/use-holdings";
 import type { AssetType } from "@/lib/api";
+import { elapsedSince, formatDateShort } from "@/lib/date-range";
 import { formatCurrency, formatPercent } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +46,15 @@ export function HoldingsList({ filterType }: { filterType?: AssetType }) {
                 {ASSET_TYPE_LABEL[h.assetType]} · {quantity} units
                 {price === null && " · price unavailable"}
               </p>
+              {h.acquiredOn && (
+                <p className="text-xs text-muted-foreground">
+                  Bought {formatDateShort(h.acquiredOn)}
+                  {(() => {
+                    const held = elapsedSince(h.acquiredOn);
+                    return held ? ` · held ${held}` : "";
+                  })()}
+                </p>
+              )}
             </div>
             <div className="flex items-center gap-3">
               <div className="text-right">

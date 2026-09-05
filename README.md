@@ -60,6 +60,13 @@ To deploy: import the repo into Vercel, set the same env vars there, and connect
 - **Income / Expense** — transaction log (income/expense with category), monthly summary.
 - **Wishlist** — symbols you're watching, with an optional target price.
 - **Account** — display name, cash accounts CRUD, other assets CRUD.
+
+Holdings, cash accounts and other assets each take a date (purchase date /
+opened on / acquired on), pre-filled with today but freely backdated, so assets
+can be entered retrospectively. Holdings show how long they've been held. The
+date is a record of when you acquired something — it does not rewrite past
+`net_worth_snapshots`, which only accumulate from the day you start using the
+app.
 - **Settings** — theme (light/dark), accent color preset, Total Assets card
   skin, target allocation (the mix the Allocation Drift widget compares
   against), change passphrase.

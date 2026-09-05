@@ -24,6 +24,7 @@ export type Holding = {
   quantity: string;
   avgCostBasis: string;
   account: string | null;
+  acquiredOn: string | null;
   lastPrice: string | null;
   priceFetchedAt: string | null;
 };
@@ -34,18 +35,21 @@ export type HoldingInput = {
   quantity: number;
   avgCostBasis: number;
   account?: string;
+  acquiredOn?: string;
 };
 
 export type CashAccount = {
   id: number;
   name: string;
   balance: string;
+  acquiredOn: string | null;
   createdAt: string;
 };
 
 export type CashInput = {
   name: string;
   balance: number;
+  acquiredOn?: string;
 };
 
 export type TransactionType = "income" | "expense";
@@ -88,12 +92,14 @@ export type OtherAsset = {
   id: number;
   name: string;
   value: string;
+  acquiredOn: string | null;
   createdAt: string;
 };
 
 export type OtherAssetInput = {
   name: string;
   value: number;
+  acquiredOn?: string;
 };
 
 export type WidgetType =

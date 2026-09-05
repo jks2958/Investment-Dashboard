@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD");
+
 export const holdingInsertSchema = z
   .object({
     symbol: z.string().trim().min(1).max(20),
@@ -7,6 +9,7 @@ export const holdingInsertSchema = z
     quantity: z.coerce.number().positive(),
     avgCostBasis: z.coerce.number().nonnegative(),
     account: z.string().trim().max(60).optional(),
+    acquiredOn: isoDate.optional(),
   })
   .transform((data) => ({
     ...data,
@@ -20,6 +23,7 @@ export const holdingUpdateSchema = z
     quantity: z.coerce.number().positive().optional(),
     avgCostBasis: z.coerce.number().nonnegative().optional(),
     account: z.string().trim().max(60).optional(),
+    acquiredOn: isoDate.optional(),
   })
   .transform((data) => ({
     ...data,
@@ -34,6 +38,7 @@ export const holdingUpdateSchema = z
 export const cashInsertSchema = z.object({
   name: z.string().trim().min(1).max(60),
   balance: z.coerce.number().nonnegative(),
+  acquiredOn: isoDate.optional(),
 });
 
 export const cashUpdateSchema = cashInsertSchema.partial();
@@ -41,6 +46,7 @@ export const cashUpdateSchema = cashInsertSchema.partial();
 export const otherAssetInsertSchema = z.object({
   name: z.string().trim().min(1).max(60),
   value: z.coerce.number().nonnegative(),
+  acquiredOn: isoDate.optional(),
 });
 
 export const otherAssetUpdateSchema = otherAssetInsertSchema.partial();
@@ -49,7 +55,7 @@ export const transactionInsertSchema = z.object({
   type: z.enum(["income", "expense"]),
   category: z.string().trim().min(1).max(40),
   amount: z.coerce.number().positive(),
-  occurredOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+  occurredOn: isoDate,
   note: z.string().trim().max(200).optional(),
 });
 

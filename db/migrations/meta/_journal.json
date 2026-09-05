@@ -43,6 +43,13 @@
       "when": 1788585755375,
       "tag": "0005_mixed_makkari",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788588116065,
+      "tag": "0006_short_epoch",
+      "breakpoints": true
     }
   ]
 }

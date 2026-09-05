@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { useCreateHolding } from "@/hooks/use-holdings";
 import type { AssetType } from "@/lib/api";
+import { todayIso } from "@/lib/date-range";
 
 const ASSET_TYPES: { value: AssetType; label: string }[] = [
   { value: "stock", label: "Stock" },
@@ -32,6 +33,7 @@ export function AddHoldingDialog({ lockType }: { lockType?: AssetType }) {
   const [assetType, setAssetType] = React.useState<AssetType>(lockType ?? "stock");
   const [quantity, setQuantity] = React.useState("");
   const [avgCostBasis, setAvgCostBasis] = React.useState("");
+  const [acquiredOn, setAcquiredOn] = React.useState(todayIso());
   const [error, setError] = React.useState<string | null>(null);
   const create = useCreateHolding();
 
@@ -40,6 +42,7 @@ export function AddHoldingDialog({ lockType }: { lockType?: AssetType }) {
     setAssetType(lockType ?? "stock");
     setQuantity("");
     setAvgCostBasis("");
+    setAcquiredOn(todayIso());
     setError(null);
   }
 
@@ -52,6 +55,7 @@ export function AddHoldingDialog({ lockType }: { lockType?: AssetType }) {
         assetType,
         quantity: Number(quantity),
         avgCostBasis: Number(avgCostBasis),
+        ...(acquiredOn ? { acquiredOn } : {}),
       });
       reset();
       setOpen(false);
@@ -130,6 +134,19 @@ export function AddHoldingDialog({ lockType }: { lockType?: AssetType }) {
                 required
               />
             </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="acquiredOn">Purchase date</Label>
+            <Input
+              id="acquiredOn"
+              type="date"
+              max={todayIso()}
+              value={acquiredOn}
+              onChange={(e) => setAcquiredOn(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Set an earlier date to record something you bought in the past.
+            </p>
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" className="w-full" disabled={create.isPending}>
