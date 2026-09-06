@@ -18,6 +18,17 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export type AssetType = "stock" | "fund" | "crypto";
 
+/**
+ * The currency an amount was entered in.
+ *
+ * Note the asymmetry, which is deliberate: on the way **in**, an amount is a
+ * figure in `currency` — type 45000 with PKR and that's what's stored. On the
+ * way **out**, every money field is USD, with the figure as typed repeated in
+ * a `nativeX` field for the edit form. That keeps every total, chart and
+ * snapshot in one unit without teaching each of them about exchange rates.
+ */
+export type EntryCurrency = "USD" | "PKR";
+
 export type Holding = {
   id: number;
   symbol: string;
@@ -40,6 +51,8 @@ export type HoldingInput = {
 };
 
 export type CashAccount = {
+  currency: EntryCurrency;
+  nativeBalance: string | null;
   id: number;
   name: string;
   balance: string;
@@ -48,6 +61,7 @@ export type CashAccount = {
 };
 
 export type CashInput = {
+  currency?: EntryCurrency;
   name: string;
   balance: number;
   acquiredOn?: string;
@@ -56,6 +70,8 @@ export type CashInput = {
 export type TransactionType = "income" | "expense";
 
 export type Transaction = {
+  currency: EntryCurrency;
+  nativeAmount: string | null;
   id: number;
   type: TransactionType;
   category: string;
@@ -66,10 +82,44 @@ export type Transaction = {
 };
 
 export type TransactionInput = {
+  currency?: EntryCurrency;
   type: TransactionType;
   category: string;
   amount: number;
   occurredOn: string;
+  note?: string;
+};
+
+export type Recurrence = "monthly" | "quarterly" | "yearly";
+
+/** A template for an entry that repeats. Never auto-posted — dueDates are the
+ *  occurrences waiting for you to confirm them. */
+export type RecurringTransaction = {
+  id: number;
+  currency: EntryCurrency;
+  nativeAmount: string | null;
+  type: TransactionType;
+  category: string;
+  amount: string;
+  recurrence: Recurrence;
+  startsOn: string;
+  endsOn: string | null;
+  lastPostedOn: string | null;
+  active: boolean;
+  note: string | null;
+  createdAt: string;
+  dueDates: string[];
+};
+
+export type RecurringInput = {
+  currency?: EntryCurrency;
+  type: TransactionType;
+  category: string;
+  amount: number;
+  recurrence?: Recurrence;
+  startsOn: string;
+  endsOn?: string;
+  active?: boolean;
   note?: string;
 };
 
@@ -90,6 +140,8 @@ export type WishlistInput = {
 };
 
 export type OtherAsset = {
+  currency: EntryCurrency;
+  nativeValue: string | null;
   id: number;
   name: string;
   value: string;
@@ -98,6 +150,7 @@ export type OtherAsset = {
 };
 
 export type OtherAssetInput = {
+  currency?: EntryCurrency;
   name: string;
   value: number;
   acquiredOn?: string;
@@ -125,6 +178,7 @@ export type WidgetType =
   | "wishlist-targets"
   | "allocation-drift"
   | "debts"
+  | "debt-payoff"
   | "commitments";
 
 export type WidgetLayoutItem = {
@@ -211,6 +265,10 @@ export type DebtKind =
 
 /** Money owed now — subtracts from net worth. */
 export type Debt = {
+  currency: EntryCurrency;
+  nativeBalance: string | null;
+  nativeOriginalAmount: string | null;
+  nativeMonthlyPayment: string | null;
   id: number;
   name: string;
   kind: DebtKind;
@@ -226,6 +284,7 @@ export type Debt = {
 };
 
 export type DebtInput = {
+  currency?: EntryCurrency;
   name: string;
   kind: DebtKind;
   lender?: string;
@@ -250,6 +309,9 @@ export type CommitmentCertainty = "confirmed" | "likely" | "possible";
 
 /** A future cost you don't owe anyone yet — deliberately excluded from net worth. */
 export type Commitment = {
+  currency: EntryCurrency;
+  nativeAmount: string | null;
+  nativeFundedAmount: string | null;
   id: number;
   name: string;
   category: CommitmentCategory;
@@ -263,6 +325,7 @@ export type Commitment = {
 };
 
 export type CommitmentInput = {
+  currency?: EntryCurrency;
   name: string;
   category: CommitmentCategory;
   amount: number;
@@ -315,12 +378,34 @@ export const api = {
   },
 
   transactions: {
-    list: () => request<Transaction[]>("/api/transactions"),
+    /** Defaults to the last 24 months server-side; pass more to widen it. */
+    list: (months?: number) =>
+      request<Transaction[]>(
+        months === undefined ? "/api/transactions" : `/api/transactions?months=${months}`,
+      ),
     create: (input: TransactionInput) =>
       request<Transaction>("/api/transactions", { method: "POST", body: JSON.stringify(input) }),
     update: (id: number, input: Partial<TransactionInput>) =>
       request<Transaction>(`/api/transactions/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
     remove: (id: number) => request<void>(`/api/transactions/${id}`, { method: "DELETE" }),
+  },
+
+  recurring: {
+    list: () => request<RecurringTransaction[]>("/api/recurring"),
+    create: (input: RecurringInput) =>
+      request<RecurringTransaction>("/api/recurring", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+    update: (id: number, input: Partial<RecurringInput>) =>
+      request<RecurringTransaction>(`/api/recurring/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      }),
+    remove: (id: number) => request<void>(`/api/recurring/${id}`, { method: "DELETE" }),
+    /** Writes the outstanding occurrences into the transaction log. */
+    post: (id: number) =>
+      request<{ posted: number }>(`/api/recurring/${id}?action=post`, { method: "POST" }),
   },
 
   wishlist: {

@@ -3,6 +3,7 @@ import { desc, eq, gte } from "drizzle-orm";
 import { db } from "../../db/client.js";
 import { netWorthSnapshots } from "../../db/schema.js";
 import { computeAssetTypeValues } from "./portfolioValue.js";
+import { localTodayIso } from "./localDate.js";
 
 /** Guards against an unbounded read once years of history accumulate. */
 const MAX_ROWS = 800;
@@ -16,14 +17,6 @@ export type SnapshotEntry = {
   otherValue: number;
   debtTotal: number;
 };
-
-/** Local-time date, so a snapshot lands on the day the user is actually in. */
-function todayIso(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate(),
-  ).padStart(2, "0")}`;
-}
 
 export async function recordTodaySnapshot(): Promise<void> {
   const values = await computeAssetTypeValues();
@@ -40,7 +33,7 @@ export async function recordTodaySnapshot(): Promise<void> {
 
   await db
     .insert(netWorthSnapshots)
-    .values({ snapshotDate: todayIso(), ...row })
+    .values({ snapshotDate: localTodayIso(), ...row })
     .onConflictDoUpdate({ target: netWorthSnapshots.snapshotDate, set: row });
 }
 

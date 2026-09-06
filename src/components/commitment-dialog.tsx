@@ -12,7 +12,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCreateCommitment, useUpdateCommitment } from "@/hooks/use-commitments";
-import type { Commitment, CommitmentCategory, CommitmentCertainty } from "@/lib/api";
+import { MoneyInput } from "@/components/money-input";
+import type {
+  Commitment,
+  CommitmentCategory,
+  CommitmentCertainty,
+  EntryCurrency,
+} from "@/lib/api";
 import { formatCurrency } from "@/lib/format";
 import {
   CERTAINTIES,
@@ -34,6 +40,7 @@ export function CommitmentDialog({
   const [name, setName] = React.useState("");
   const [category, setCategory] = React.useState<CommitmentCategory>("education");
   const [amount, setAmount] = React.useState("");
+  const [currency, setCurrency] = React.useState<EntryCurrency>("USD");
   const [dueOn, setDueOn] = React.useState("");
   const [recurringYears, setRecurringYears] = React.useState("1");
   const [certainty, setCertainty] = React.useState<CommitmentCertainty>("confirmed");
@@ -50,13 +57,15 @@ export function CommitmentDialog({
   useFormReset(isOpen, () => {
     setName(editing?.name ?? "");
     setCategory(editing?.category ?? "education");
-    setAmount(editing ? String(Number(editing.amount)) : "");
+    setAmount(editing ? String(Number(editing.nativeAmount ?? editing.amount)) : "");
+    setCurrency(editing?.currency ?? "USD");
     setDueOn(editing?.dueOn ?? "");
     setRecurringYears(String(editing?.recurringYears ?? 1));
     setCertainty(editing?.certainty ?? "confirmed");
     // A zero funded amount is the default, so show it as an empty field
     // rather than a "0" the user has to clear before typing.
-    setFundedAmount(editing && Number(editing.fundedAmount) > 0 ? String(Number(editing.fundedAmount)) : "");
+    const funded = Number(editing?.nativeFundedAmount ?? editing?.fundedAmount ?? 0);
+    setFundedAmount(editing && funded > 0 ? String(funded) : "");
     setError(null);
   });
 
@@ -67,6 +76,7 @@ export function CommitmentDialog({
       name,
       category,
       amount: Number(amount),
+      currency,
       dueOn,
       recurringYears: years,
       certainty,
@@ -142,19 +152,18 @@ export function CommitmentDialog({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        <div className="space-y-1.5">
-          <Label htmlFor="commitAmount">Amount</Label>
-          <Input
-            id="commitAmount"
-            type="number"
-            step="any"
-            min="0"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            required
-          />
-        </div>
+      <MoneyInput
+        id="commitAmount"
+        label="Amount"
+        value={amount}
+        onValueChange={setAmount}
+        currency={currency}
+        onCurrencyChange={setCurrency}
+        required
+        hint="“Saved so far” is read in the same currency."
+      />
+
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor="commitYears">× years</Label>
           <Input

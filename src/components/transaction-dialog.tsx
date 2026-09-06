@@ -12,7 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCreateTransaction, useUpdateTransaction } from "@/hooks/use-transactions";
-import type { Transaction, TransactionType } from "@/lib/api";
+import { MoneyInput } from "@/components/money-input";
+import type { EntryCurrency, Transaction, TransactionType } from "@/lib/api";
 import { todayIso } from "@/lib/date-range";
 
 export function TransactionDialog({
@@ -28,6 +29,7 @@ export function TransactionDialog({
   const [type, setType] = React.useState<TransactionType>("expense");
   const [category, setCategory] = React.useState("");
   const [amount, setAmount] = React.useState("");
+  const [currency, setCurrency] = React.useState<EntryCurrency>("USD");
   const [occurredOn, setOccurredOn] = React.useState(todayIso());
   const [note, setNote] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
@@ -38,7 +40,8 @@ export function TransactionDialog({
   useFormReset(isOpen, () => {
     setType(editing?.type ?? "expense");
     setCategory(editing?.category ?? "");
-    setAmount(editing ? String(Number(editing.amount)) : "");
+    setAmount(editing ? String(Number(editing.nativeAmount ?? editing.amount)) : "");
+    setCurrency(editing?.currency ?? "USD");
     setOccurredOn(editing?.occurredOn ?? todayIso());
     setNote(editing?.note ?? "");
     setError(null);
@@ -51,6 +54,7 @@ export function TransactionDialog({
       type,
       category,
       amount: Number(amount),
+      currency,
       occurredOn,
       ...(note ? { note } : {}),
     };
@@ -96,29 +100,29 @@ export function TransactionDialog({
           required
         />
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1.5">
-          <Label htmlFor="txAmount">Amount</Label>
-          <Input
-            id="txAmount"
-            type="number"
-            step="any"
-            min="0"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            required
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="txOccurredOn">Date</Label>
-          <Input
-            id="txOccurredOn"
-            type="date"
-            value={occurredOn}
-            onChange={(e) => setOccurredOn(e.target.value)}
-            required
-          />
-        </div>
+      <MoneyInput
+        id="txAmount"
+        label="Amount"
+        value={amount}
+        onValueChange={setAmount}
+        currency={currency}
+        onCurrencyChange={setCurrency}
+        required
+        hint={
+          currency === "PKR"
+            ? "Saved at today's rate and kept there — past entries don't re-price when the rupee moves."
+            : undefined
+        }
+      />
+      <div className="space-y-1.5">
+        <Label htmlFor="txOccurredOn">Date</Label>
+        <Input
+          id="txOccurredOn"
+          type="date"
+          value={occurredOn}
+          onChange={(e) => setOccurredOn(e.target.value)}
+          required
+        />
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="txNote">Note (optional)</Label>

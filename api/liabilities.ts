@@ -3,6 +3,7 @@ import { asc, eq } from "drizzle-orm";
 
 import { db } from "../db/client.js";
 import { commitments, debts } from "../db/schema.js";
+import { currentUsdPkrRate, withUsd } from "../lib/server/money.js";
 import { requireAuth } from "../lib/server/requireAuth.js";
 import {
   commitmentInsertSchema,
@@ -23,8 +24,9 @@ function one(value: string | string[] | undefined): string | undefined {
 async function handleDebts(req: VercelRequest, res: VercelResponse, idParam?: string) {
   if (idParam === undefined) {
     if (req.method === "GET") {
+      const rate = await currentUsdPkrRate();
       const rows = await db.select().from(debts).orderBy(asc(debts.name));
-      res.status(200).json(rows);
+      res.status(200).json(rows.map((row) => withUsd(row, ["balance", "originalAmount", "monthlyPayment"], rate)));
       return;
     }
 
@@ -47,7 +49,7 @@ async function handleDebts(req: VercelRequest, res: VercelResponse, idParam?: st
         })
         .returning();
 
-      res.status(201).json(created);
+      res.status(201).json(withUsd(created, ["balance", "originalAmount", "monthlyPayment"], await currentUsdPkrRate()));
       return;
     }
 
@@ -81,7 +83,7 @@ async function handleDebts(req: VercelRequest, res: VercelResponse, idParam?: st
       return;
     }
 
-    res.status(200).json(updated);
+    res.status(200).json(withUsd(updated, ["balance", "originalAmount", "monthlyPayment"], await currentUsdPkrRate()));
     return;
   }
 
@@ -101,8 +103,9 @@ async function handleDebts(req: VercelRequest, res: VercelResponse, idParam?: st
 async function handleCommitments(req: VercelRequest, res: VercelResponse, idParam?: string) {
   if (idParam === undefined) {
     if (req.method === "GET") {
+      const rate = await currentUsdPkrRate();
       const rows = await db.select().from(commitments).orderBy(asc(commitments.dueOn));
-      res.status(200).json(rows);
+      res.status(200).json(rows.map((row) => withUsd(row, ["amount", "fundedAmount"], rate)));
       return;
     }
 
@@ -123,7 +126,7 @@ async function handleCommitments(req: VercelRequest, res: VercelResponse, idPara
         })
         .returning();
 
-      res.status(201).json(created);
+      res.status(201).json(withUsd(created, ["amount", "fundedAmount"], await currentUsdPkrRate()));
       return;
     }
 
@@ -160,7 +163,7 @@ async function handleCommitments(req: VercelRequest, res: VercelResponse, idPara
       return;
     }
 
-    res.status(200).json(updated);
+    res.status(200).json(withUsd(updated, ["amount", "fundedAmount"], await currentUsdPkrRate()));
     return;
   }
 

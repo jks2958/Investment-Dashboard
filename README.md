@@ -35,6 +35,15 @@ Required env (see `.env.example`):
 - `AUTH_SESSION_SECRET` — session cookie signing secret
 - `FINNHUB_API_KEY` — stock/ETF price data (free tier, no credit card required: https://finnhub.io)
 
+Optional:
+
+- `CRON_SECRET` — enables the nightly snapshot. Vercel sets and sends this
+  automatically when you add it in project settings; without it the cron path
+  is refused rather than left open.
+- `SNAPSHOT_UTC_OFFSET_MINUTES` — your offset from UTC, so a snapshot lands on
+  the day you're actually in (Pakistan, UTC+5, is `300`). Functions run in UTC,
+  so unset means a late-evening entry can be filed under the previous day.
+
 CoinGecko needs no API key for crypto prices.
 
 ## First-time setup
@@ -117,11 +126,31 @@ row is noise.
 
 ## Currency
 
-Every amount is **stored in USD** — market data arrives in USD and keeping one
-storage currency avoids re-denominating history whenever a rate moves. The
-`currency` setting only affects display, converting at the stored
-`usd_pkr_rate`. The Total Assets card always shows both, with the inactive
-currency underneath as the equivalent.
+**USD is the unit every total, chart and snapshot is computed in**, and the API
+reports USD in the fields it always did — which is why none of the aggregation
+code knows anything about exchange rates.
+
+What rows now record is the amount **as it was actually entered**, plus its
+currency. Entering a rupee figure used to mean dividing by the rate in your
+head, and the result then froze at whatever rate you happened to use with no
+record of which one it was. Every amount field carries a USD/PKR toggle and
+shows the conversion live as you type.
+
+Note the deliberate asymmetry: on the way **in**, an amount is a figure in its
+own `currency`; on the way **out**, every money field is USD, with the figure as
+typed repeated in a `nativeX` field so the edit form shows back what you wrote.
+
+Two conversion rules, because balances and history aren't the same thing:
+
+- **Balances** — cash, other assets, debts, commitments — convert at *today's*
+  rate. A rupee account is worth what it's worth today.
+- **Transactions** freeze the rate at entry, stored per row in `fx_rate`. A
+  grocery bill from March shouldn't re-price itself every time the rupee moves.
+  Only changing a row's currency re-stamps it; correcting a typo in the amount
+  does not.
+
+The display `currency` setting is separate and only affects rendering. The Total
+Assets card always shows both, with the inactive currency underneath.
 
 The rate is editable by hand and can be refreshed from open.er-api.com (free,
 no key) via **Settings → Currency → Fetch latest**. A failed lookup leaves the
@@ -187,6 +216,13 @@ Available widgets, beyond the defaults listed above:
   to add or trim to get back on target. Set targets in Settings.
 - **Debts** — total owed, share of assets, largest balances, and the
   highest-rate debt to attack first.
+- **Debt Payoff Plan** — when each debt clears and what it costs in interest,
+  from the balance, rate and monthly payment already recorded (no new data
+  entry). Compares avalanche against snowball, and an "extra per month" box
+  shows what more money buys. With nothing spare to direct the two strategies
+  are identical, and the widget says so rather than showing two equal numbers
+  as if they were a comparison. Per-debt rows are standalone — no rollover —
+  which is why they run longer than the combined plan.
 - **Future Commitments** — what to set aside monthly, measured against what
   you're actually saving.
 - Cash Accounts, Other Assets, Wishlist, Recent Transactions, and per-type
@@ -199,9 +235,45 @@ component under `src/widgets/`) to make a new widget available in the palette.
 A new type also needs adding to `WidgetType` in `src/lib/api.ts` and
 `widgetTypeSchema` in `lib/server/validation.ts`, which are mirrored by hand.
 
+### Recurring entries
+
+Salary, rent, school fees — templates under **Income / Expense**, with a
+monthly, quarterly or yearly cadence and an optional end date. They are
+**never auto-posted**: a template says what's *expected*, and writing it into
+the log unasked would invent transactions that may not have happened. Due
+occurrences wait for a confirm, and posting skips any matching row that already
+exists, so a double tap can't duplicate an entry.
+
+A template starting on the 31st clamps to the last day of shorter months rather
+than rolling into the 1st, which would drift the whole series forward.
+
+### Filtering the transaction log
+
+The Income/Expense page filters by month (opening on the current one, so the
+stat cards and the list below them agree), type, category and free text, and
+pages 50 rows at a time. The API bounds its read by date — 24 months by default
+— rather than by a flat row count, which used to silently drop older rows.
+Filtering happens client-side against that window, so it's instant and costs no
+extra requests.
+
+### Export
+
+**Settings → Export your data** downloads everything as one JSON file or a CSV
+per table. Built in the browser from data already fetched — partly for speed,
+partly because Vercel's Hobby plan caps a deployment at 12 serverless functions
+and this project sits at 11, so an export endpoint would have spent the last
+slot.
+
 Sparklines, the percentage deltas beside them and the Net Worth Trend chart are
-driven by a daily `net_worth_snapshots` table that self-records on each
-dashboard load. They all look back over the same window — 6 months, set once as
+driven by a daily `net_worth_snapshots` table.
+
+A row is written on each dashboard load **and** by a nightly Vercel Cron, so
+history has no holes on days the app isn't opened — Recharts draws a straight
+line across a gap, which is a smooth trend that never happened. The cron uses
+the same `/api/snapshots` function (no extra function slot) and authenticates
+with `CRON_SECRET`; without that env var set the cron path refuses rather than
+defaulting to an open public write. Hobby allows one cron per day, fired
+somewhere within the scheduled hour. They all look back over the same window — 6 months, set once as
 `TREND_WINDOW_DAYS` in `src/lib/date-range.ts` alongside the label that
 describes it, so a figure and its caption can't drift apart. The trend chart
 opens there too but can be switched per-view without affecting the sparklines,

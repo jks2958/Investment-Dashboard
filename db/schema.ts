@@ -6,6 +6,7 @@ import {
   timestamp,
   date,
   jsonb,
+  boolean,
   pgEnum,
 } from "drizzle-orm/pg-core";
 
@@ -26,6 +27,12 @@ export type AllocationTargets = {
   cash: number;
   other: number;
 };
+
+/** The currency an amount was actually entered in. Everything reported by the
+ *  API is still converted to USD — this records what was typed, so a rupee
+ *  figure never has to be divided by hand and never silently drifts when the
+ *  exchange rate moves. */
+export const currencyEnum = pgEnum("currency", ["USD", "PKR"]);
 
 export const assetTypeEnum = pgEnum("asset_type", [
   "stock",
@@ -74,6 +81,7 @@ export const cashAccounts = pgTable("cash_accounts", {
   name: text("name").notNull(),
   balance: numeric("balance", { precision: 18, scale: 2 }).notNull(),
   acquiredOn: date("acquired_on"),
+  currency: currencyEnum("currency").notNull().default("USD"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -82,6 +90,7 @@ export const otherAssets = pgTable("other_assets", {
   name: text("name").notNull(),
   value: numeric("value", { precision: 18, scale: 2 }).notNull(),
   acquiredOn: date("acquired_on"),
+  currency: currencyEnum("currency").notNull().default("USD"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -113,6 +122,40 @@ export const transactions = pgTable("transactions", {
   amount: numeric("amount", { precision: 18, scale: 2 }).notNull(),
   occurredOn: date("occurred_on").notNull(),
   note: text("note"),
+  currency: currencyEnum("currency").notNull().default("USD"),
+  /** USD→PKR rate on the day this was entered. Null for USD rows. */
+  fxRate: numeric("fx_rate", { precision: 12, scale: 4 }),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+/** How often a recurring entry repeats. Weekly is deliberately absent: this
+ *  is for salary, rent and bills, and a weekly template creates enough noise
+ *  to make the confirm step worse than typing the entry. */
+export const recurrenceEnum = pgEnum("recurrence", ["monthly", "quarterly", "yearly"]);
+
+/**
+ * A template for an entry that repeats — salary, rent, school fees.
+ *
+ * Deliberately not auto-posted. A template says what is *expected*; posting it
+ * without asking would invent transactions that may not have happened, and
+ * quietly wrong income figures are worse than a prompt. `lastPostedOn` records
+ * the occurrence date most recently turned into a real transaction, so the app
+ * can work out what's still due.
+ */
+export const recurringTransactions = pgTable("recurring_transactions", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  type: transactionTypeEnum("type").notNull(),
+  category: text("category").notNull(),
+  amount: numeric("amount", { precision: 18, scale: 2 }).notNull(),
+  recurrence: recurrenceEnum("recurrence").notNull().default("monthly"),
+  /** The first occurrence. Later ones step forward from here. */
+  startsOn: date("starts_on").notNull(),
+  /** Optional end — a lease that runs out, a course that finishes. */
+  endsOn: date("ends_on"),
+  lastPostedOn: date("last_posted_on"),
+  active: boolean("active").notNull().default(true),
+  note: text("note"),
+  currency: currencyEnum("currency").notNull().default("USD"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -154,6 +197,7 @@ export const debts = pgTable("debts", {
   startedOn: date("started_on"),
   payoffTargetOn: date("payoff_target_on"),
   note: text("note"),
+  currency: currencyEnum("currency").notNull().default("USD"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -172,6 +216,7 @@ export const commitments = pgTable("commitments", {
     .notNull()
     .default("0"),
   note: text("note"),
+  currency: currencyEnum("currency").notNull().default("USD"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

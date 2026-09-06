@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { CommitmentDialog } from "@/components/commitment-dialog";
 import { DebtDialog } from "@/components/debt-dialog";
+import { DebtPayoffWidget } from "@/widgets/debt-payoff-widget";
 import { CommitmentsList } from "@/components/commitments-list";
 import { DebtsList } from "@/components/debts-list";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -108,7 +109,11 @@ export function LiabilitiesPage() {
             <DebtsList />
           </CardContent>
         </Card>
-      ) : (
+      ) : null}
+
+      {tab === "debts" && summary.totalOwed > 0 && <DebtPayoffWidget />}
+
+      {tab === "commitments" ? (
         <Card>
           <CardHeader>
             <div>
@@ -133,7 +138,7 @@ export function LiabilitiesPage() {
             <CommitmentsList />
           </CardContent>
         </Card>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { api, type Accent, type AllocationTargets } from "@/lib/api";
 import { CARD_SKINS, CARD_SKIN_VALUES } from "@/lib/card-skins";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/theme";
+import { ExportCard } from "@/components/export-card";
 
 const ACCENT_PRESETS: { value: Accent; label: string; swatch: string }[] = [
   { value: "forest", label: "Forest", swatch: "oklch(0.52 0.13 152)" },
@@ -343,6 +344,8 @@ export function SettingsPage() {
           </form>
         </CardContent>
       </Card>
+
+      <ExportCard />
     </div>
   );
 }

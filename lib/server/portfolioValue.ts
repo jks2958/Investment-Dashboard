@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 
 import { db } from "../../db/client.js";
 import { cashAccounts, debts, holdings, otherAssets, priceCache } from "../../db/schema.js";
+import { currentUsdPkrRate, toUsd } from "./money.js";
 
 export type AssetTypeValues = {
   stock: number;
@@ -43,14 +44,22 @@ export async function computeAssetTypeValues(): Promise<AssetTypeValues> {
     values.totalInvested += quantity * Number(row.avgCostBasis);
   }
 
-  const cash = await db.select({ balance: cashAccounts.balance }).from(cashAccounts);
-  values.cash = cash.reduce((sum, c) => sum + Number(c.balance), 0);
+  // Holdings are priced in USD by the market data providers, so only the
+  // hand-entered balances below can carry a currency of their own.
+  const rate = await currentUsdPkrRate();
 
-  const other = await db.select({ value: otherAssets.value }).from(otherAssets);
-  values.other = other.reduce((sum, o) => sum + Number(o.value), 0);
+  const cash = await db
+    .select({ balance: cashAccounts.balance, currency: cashAccounts.currency })
+    .from(cashAccounts);
+  values.cash = cash.reduce((sum, c) => sum + toUsd(Number(c.balance), c.currency, rate), 0);
 
-  const owed = await db.select({ balance: debts.balance }).from(debts);
-  values.debt = owed.reduce((sum, d) => sum + Number(d.balance), 0);
+  const other = await db
+    .select({ value: otherAssets.value, currency: otherAssets.currency })
+    .from(otherAssets);
+  values.other = other.reduce((sum, o) => sum + toUsd(Number(o.value), o.currency, rate), 0);
+
+  const owed = await db.select({ balance: debts.balance, currency: debts.currency }).from(debts);
+  values.debt = owed.reduce((sum, d) => sum + toUsd(Number(d.balance), d.currency, rate), 0);
 
   return values;
 }

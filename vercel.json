@@ -7,6 +7,11 @@
     { "source": "/api/other-assets/:id", "destination": "/api/other-assets?id=:id" },
     { "source": "/api/wishlist/:id", "destination": "/api/wishlist?id=:id" },
     { "source": "/api/transactions/:id", "destination": "/api/transactions?id=:id" },
+    {
+      "source": "/api/recurring/:id",
+      "destination": "/api/transactions?kind=recurring&id=:id"
+    },
+    { "source": "/api/recurring", "destination": "/api/transactions?kind=recurring" },
     { "source": "/api/auth/:action", "destination": "/api/auth?action=:action" },
     { "source": "/api/debts/:id", "destination": "/api/liabilities?kind=debt&id=:id" },
     { "source": "/api/debts", "destination": "/api/liabilities?kind=debt" },
@@ -18,10 +23,12 @@
     { "source": "/api/snapshots/:date", "destination": "/api/snapshots?date=:date" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
+  "crons": [{ "path": "/api/snapshots", "schedule": "0 18 * * *" }],
   "headers": [
     {
       "source": "/(.*)",
-      "headers": [
+      "crons": [{ "path": "/api/snapshots", "schedule": "0 18 * * *" }],
+  "headers": [
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }

@@ -62,3 +62,20 @@ export function formatPercent(value: number): string {
   const sign = value > 0 ? "+" : "";
   return `${sign}${value.toFixed(1)}%`;
 }
+
+/**
+ * The amount as it was actually entered, for rows recorded in another currency.
+ *
+ * Lists render every figure in the display currency so totals add up, which
+ * hides the fact that a row was typed in rupees. Showing the original next to
+ * it makes a converted number checkable against a bank statement.
+ */
+export function nativeAmountNote(
+  currency: Currency,
+  nativeAmount: string | null | undefined,
+): string | undefined {
+  if (currency === "USD" || nativeAmount === null || nativeAmount === undefined) return undefined;
+  const value = Number(nativeAmount);
+  if (!Number.isFinite(value)) return undefined;
+  return formatInCurrency(value / config.usdPkrRate, currency);
+}

@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateOtherAsset, useUpdateOtherAsset } from "@/hooks/use-other-assets";
-import type { OtherAsset } from "@/lib/api";
+import { MoneyInput } from "@/components/money-input";
+import type { EntryCurrency, OtherAsset } from "@/lib/api";
 import { todayIso } from "@/lib/date-range";
 
 export function OtherAssetDialog({
@@ -20,6 +21,7 @@ export function OtherAssetDialog({
   const [isOpen, setOpen, controlled] = useDialogOpen(open, onOpenChange);
   const [name, setName] = React.useState("");
   const [value, setValue] = React.useState("");
+  const [currency, setCurrency] = React.useState<EntryCurrency>("USD");
   const [acquiredOn, setAcquiredOn] = React.useState(todayIso());
   const [error, setError] = React.useState<string | null>(null);
 
@@ -28,7 +30,8 @@ export function OtherAssetDialog({
 
   useFormReset(isOpen, () => {
     setName(editing?.name ?? "");
-    setValue(editing ? String(Number(editing.value)) : "");
+    setValue(editing ? String(Number(editing.nativeValue ?? editing.value)) : "");
+    setCurrency(editing?.currency ?? "USD");
     setAcquiredOn(editing?.acquiredOn ?? todayIso());
     setError(null);
   });
@@ -36,7 +39,12 @@ export function OtherAssetDialog({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const input = { name, value: Number(value), ...(acquiredOn ? { acquiredOn } : {}) };
+    const input = {
+      name,
+      value: Number(value),
+      currency,
+      ...(acquiredOn ? { acquiredOn } : {}),
+    };
     try {
       if (editing) await update.mutateAsync({ id: editing.id, input });
       else await create.mutateAsync(input);
@@ -74,18 +82,15 @@ export function OtherAssetDialog({
           required
         />
       </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="assetValue">Value</Label>
-        <Input
-          id="assetValue"
-          type="number"
-          step="any"
-          min="0"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          required
-        />
-      </div>
+      <MoneyInput
+        id="assetValue"
+        label="Value"
+        value={value}
+        onValueChange={setValue}
+        currency={currency}
+        onCurrencyChange={setCurrency}
+        required
+      />
       <div className="space-y-1.5">
         <Label htmlFor="assetAcquiredOn">Acquired on</Label>
         <Input

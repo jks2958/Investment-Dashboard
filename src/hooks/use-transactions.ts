@@ -2,8 +2,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api, type TransactionInput } from "@/lib/api";
 
+/** The shared window every widget reads: wide enough for month-over-month
+ *  comparisons and the Income/Expense page's own filtering, without pulling
+ *  a whole financial history down on every load. */
+const DEFAULT_MONTHS = 24;
+
 export function useTransactions() {
-  return useQuery({ queryKey: ["transactions"], queryFn: api.transactions.list });
+  return useQuery({
+    queryKey: ["transactions"],
+    queryFn: () => api.transactions.list(DEFAULT_MONTHS),
+  });
 }
 
 export function useCreateTransaction() {

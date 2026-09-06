@@ -9,7 +9,7 @@ import { ListSkeleton } from "@/components/ui/skeleton";
 import { useDebts, useDeleteDebt } from "@/hooks/use-debts";
 import type { Debt } from "@/lib/api";
 import { formatDateShort } from "@/lib/date-range";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, nativeAmountNote } from "@/lib/format";
 import { DEBT_KIND_LABEL } from "@/lib/liabilities";
 
 export function DebtsList() {
@@ -43,6 +43,7 @@ export function DebtsList() {
             rate !== null ? `${rate}% APR` : null,
             payment !== null ? `${formatCurrency(payment)}/mo` : null,
             debt.payoffTargetOn ? `target ${formatDateShort(debt.payoffTargetOn)}` : null,
+            nativeAmountNote(debt.currency, debt.nativeBalance),
           ].filter(Boolean);
 
           return (

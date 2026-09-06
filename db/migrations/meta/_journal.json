@@ -64,6 +64,20 @@
       "when": 1788609998134,
       "tag": "0008_shallow_fantastic_four",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788675430002,
+      "tag": "0009_rich_moonstone",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1788675646236,
+      "tag": "0010_sad_piledriver",
+      "breakpoints": true
     }
   ]
 }

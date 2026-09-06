@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
+import { isCronRequest } from "../lib/server/cron.js";
 import { requireAuth } from "../lib/server/requireAuth.js";
 import {
   deleteSnapshot,
@@ -15,6 +16,15 @@ function one(value: string | string[] | undefined): string | undefined {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // The nightly cron has no session cookie. Without it, history only gains a
+  // row on days the app is opened, and the trend chart draws a straight line
+  // across the gap — a smooth trend that never happened.
+  if (req.method === "GET" && isCronRequest(req)) {
+    await recordTodaySnapshot();
+    res.status(200).json({ ok: true, recorded: true });
+    return;
+  }
+
   if (!requireAuth(req, res)) return;
 
   if (req.method === "GET") {

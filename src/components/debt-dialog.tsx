@@ -12,7 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCreateDebt, useUpdateDebt } from "@/hooks/use-debts";
-import type { Debt, DebtKind } from "@/lib/api";
+import { MoneyInput } from "@/components/money-input";
+import type { Debt, DebtKind, EntryCurrency } from "@/lib/api";
 import { todayIso } from "@/lib/date-range";
 import { DEBT_KINDS, DEBT_KIND_LABEL } from "@/lib/liabilities";
 
@@ -30,6 +31,7 @@ export function DebtDialog({
   const [kind, setKind] = React.useState<DebtKind>("credit_card");
   const [lender, setLender] = React.useState("");
   const [balance, setBalance] = React.useState("");
+  const [currency, setCurrency] = React.useState<EntryCurrency>("USD");
   const [interestRate, setInterestRate] = React.useState("");
   const [monthlyPayment, setMonthlyPayment] = React.useState("");
   const [startedOn, setStartedOn] = React.useState("");
@@ -46,9 +48,10 @@ export function DebtDialog({
     setName(editing?.name ?? "");
     setKind(editing?.kind ?? "credit_card");
     setLender(editing?.lender ?? "");
-    setBalance(num(editing?.balance));
+    setBalance(num(editing?.nativeBalance ?? editing?.balance));
+    setCurrency(editing?.currency ?? "USD");
     setInterestRate(num(editing?.interestRate));
-    setMonthlyPayment(num(editing?.monthlyPayment));
+    setMonthlyPayment(num(editing?.nativeMonthlyPayment ?? editing?.monthlyPayment));
     setStartedOn(editing?.startedOn ?? "");
     setPayoffTargetOn(editing?.payoffTargetOn ?? "");
     setError(null);
@@ -61,6 +64,7 @@ export function DebtDialog({
       name,
       kind,
       balance: Number(balance),
+      currency,
       ...(lender ? { lender } : {}),
       ...(interestRate ? { interestRate: Number(interestRate) } : {}),
       ...(monthlyPayment ? { monthlyPayment: Number(monthlyPayment) } : {}),
@@ -125,19 +129,18 @@ export function DebtDialog({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        <div className="space-y-1.5">
-          <Label htmlFor="debtBalance">Balance owed</Label>
-          <Input
-            id="debtBalance"
-            type="number"
-            step="any"
-            min="0"
-            value={balance}
-            onChange={(e) => setBalance(e.target.value)}
-            required
-          />
-        </div>
+      <MoneyInput
+        id="debtBalance"
+        label="Balance owed"
+        value={balance}
+        onValueChange={setBalance}
+        currency={currency}
+        onCurrencyChange={setCurrency}
+        required
+        hint="Rate and monthly payment are read in this same currency."
+      />
+
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor="debtRate">Rate %</Label>
           <Input

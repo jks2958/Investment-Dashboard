@@ -2,6 +2,10 @@ import { z } from "zod";
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD");
 
+/** The currency an amount was typed in. Absent means USD, which is what every
+ *  row created before this existed is. */
+const entryCurrency = z.enum(["USD", "PKR"]).optional();
+
 export const holdingInsertSchema = z
   .object({
     symbol: z.string().trim().min(1).max(20),
@@ -38,6 +42,7 @@ export const holdingUpdateSchema = z
 export const cashInsertSchema = z.object({
   name: z.string().trim().min(1).max(60),
   balance: z.coerce.number().nonnegative(),
+  currency: entryCurrency,
   acquiredOn: isoDate.optional(),
 });
 
@@ -46,6 +51,7 @@ export const cashUpdateSchema = cashInsertSchema.partial();
 export const otherAssetInsertSchema = z.object({
   name: z.string().trim().min(1).max(60),
   value: z.coerce.number().nonnegative(),
+  currency: entryCurrency,
   acquiredOn: isoDate.optional(),
 });
 
@@ -55,11 +61,26 @@ export const transactionInsertSchema = z.object({
   type: z.enum(["income", "expense"]),
   category: z.string().trim().min(1).max(40),
   amount: z.coerce.number().positive(),
+  currency: entryCurrency,
   occurredOn: isoDate,
   note: z.string().trim().max(200).optional(),
 });
 
 export const transactionUpdateSchema = transactionInsertSchema.partial();
+
+export const recurringInsertSchema = z.object({
+  type: z.enum(["income", "expense"]),
+  category: z.string().trim().min(1).max(40),
+  amount: z.coerce.number().positive(),
+  recurrence: z.enum(["monthly", "quarterly", "yearly"]).optional(),
+  currency: entryCurrency,
+  startsOn: isoDate,
+  endsOn: isoDate.optional(),
+  active: z.boolean().optional(),
+  note: z.string().trim().max(200).optional(),
+});
+
+export const recurringUpdateSchema = recurringInsertSchema.partial();
 
 export const wishlistInsertSchema = z
   .object({
@@ -123,6 +144,7 @@ export const debtInsertSchema = z.object({
   monthlyPayment: optionalMoney,
   startedOn: isoDate.optional(),
   payoffTargetOn: isoDate.optional(),
+  currency: entryCurrency,
   note: z.string().trim().max(200).optional(),
 });
 
@@ -136,6 +158,7 @@ export const commitmentInsertSchema = z.object({
   recurringYears: z.coerce.number().int().min(1).max(50).optional(),
   certainty: z.enum(["confirmed", "likely", "possible"]).optional(),
   fundedAmount: optionalMoney,
+  currency: entryCurrency,
   note: z.string().trim().max(200).optional(),
 });
 
@@ -163,6 +186,7 @@ export const widgetTypeSchema = z.enum([
   "wishlist-targets",
   "allocation-drift",
   "debts",
+  "debt-payoff",
   "commitments",
 ]);
 

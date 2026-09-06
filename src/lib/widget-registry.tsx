@@ -10,6 +10,7 @@ import { AllocationWidget } from "@/widgets/allocation-widget";
 import { CashAccountsWidget } from "@/widgets/cash-accounts-widget";
 import { CashRunwayWidget } from "@/widgets/cash-runway-widget";
 import { CommitmentsWidget } from "@/widgets/commitments-widget";
+import { DebtPayoffWidget } from "@/widgets/debt-payoff-widget";
 import { DebtsWidget } from "@/widgets/debts-widget";
 import { GainersLosersWidget } from "@/widgets/gainers-losers-widget";
 import {
@@ -144,6 +145,11 @@ export const WIDGET_REGISTRY: Record<WidgetType, WidgetDefinition> = {
   debts: {
     label: "Debts",
     Component: DebtsWidget,
+    defaultSize: { w: 4, h: 9 },
+  },
+  "debt-payoff": {
+    label: "Debt Payoff Plan",
+    Component: DebtPayoffWidget,
     defaultSize: { w: 4, h: 9 },
   },
   commitments: {

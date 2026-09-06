@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateCashAccount, useUpdateCashAccount } from "@/hooks/use-cash";
-import type { CashAccount } from "@/lib/api";
+import { MoneyInput } from "@/components/money-input";
+import type { CashAccount, EntryCurrency } from "@/lib/api";
 import { todayIso } from "@/lib/date-range";
 
 export function CashDialog({
@@ -20,6 +21,7 @@ export function CashDialog({
   const [isOpen, setOpen, controlled] = useDialogOpen(open, onOpenChange);
   const [name, setName] = React.useState("");
   const [balance, setBalance] = React.useState("");
+  const [currency, setCurrency] = React.useState<EntryCurrency>("USD");
   const [acquiredOn, setAcquiredOn] = React.useState(todayIso());
   const [error, setError] = React.useState<string | null>(null);
 
@@ -28,7 +30,10 @@ export function CashDialog({
 
   useFormReset(isOpen, () => {
     setName(editing?.name ?? "");
-    setBalance(editing ? String(Number(editing.balance)) : "");
+    // The figure as typed, not the converted one — reopening a rupee account
+    // should show the rupees back.
+    setBalance(editing ? String(Number(editing.nativeBalance ?? editing.balance)) : "");
+    setCurrency(editing?.currency ?? "USD");
     setAcquiredOn(editing?.acquiredOn ?? todayIso());
     setError(null);
   });
@@ -36,7 +41,12 @@ export function CashDialog({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const input = { name, balance: Number(balance), ...(acquiredOn ? { acquiredOn } : {}) };
+    const input = {
+      name,
+      balance: Number(balance),
+      currency,
+      ...(acquiredOn ? { acquiredOn } : {}),
+    };
     try {
       if (editing) await update.mutateAsync({ id: editing.id, input });
       else await create.mutateAsync(input);
@@ -74,18 +84,15 @@ export function CashDialog({
           required
         />
       </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="cashBalance">Balance</Label>
-        <Input
-          id="cashBalance"
-          type="number"
-          step="any"
-          min="0"
-          value={balance}
-          onChange={(e) => setBalance(e.target.value)}
-          required
-        />
-      </div>
+      <MoneyInput
+        id="cashBalance"
+        label="Balance"
+        value={balance}
+        onValueChange={setBalance}
+        currency={currency}
+        onCurrencyChange={setCurrency}
+        required
+      />
       <div className="space-y-1.5">
         <Label htmlFor="cashAcquiredOn">Opened on</Label>
         <Input

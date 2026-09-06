@@ -9,7 +9,7 @@ import { ListSkeleton } from "@/components/ui/skeleton";
 import { useCashAccounts, useDeleteCashAccount } from "@/hooks/use-cash";
 import type { CashAccount } from "@/lib/api";
 import { formatDateShort } from "@/lib/date-range";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, nativeAmountNote } from "@/lib/format";
 
 export function CashList() {
   const { data: accounts, isLoading } = useCashAccounts();
@@ -36,11 +36,14 @@ export function CashList() {
           <li key={a.id} className="flex items-center justify-between gap-3 py-3">
             <div className="min-w-0">
               <p className="font-medium">{a.name}</p>
-              {a.acquiredOn && (
-                <p className="text-xs text-muted-foreground">
-                  Opened {formatDateShort(a.acquiredOn)}
-                </p>
-              )}
+              <p className="text-xs text-muted-foreground">
+                {[
+                  a.acquiredOn ? `Opened ${formatDateShort(a.acquiredOn)}` : null,
+                  nativeAmountNote(a.currency, a.nativeBalance),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
             </div>
             <div className="flex items-center gap-1">
               <p className="mr-2 font-medium tabular-nums">{formatCurrency(Number(a.balance))}</p>
