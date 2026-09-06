@@ -78,6 +78,13 @@
       "when": 1788675646236,
       "tag": "0010_sad_piledriver",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1788714024306,
+      "tag": "0011_clear_rocket_racer",
+      "breakpoints": true
     }
   ]
 }

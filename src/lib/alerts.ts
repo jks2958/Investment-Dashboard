@@ -1,4 +1,5 @@
-import type { Commitment, Holding, WishlistItem } from "@/lib/api";
+import type { Budget, Commitment, Holding, Transaction, WishlistItem } from "@/lib/api";
+import { budgetStatuses } from "@/lib/budgets";
 import { formatDateShort } from "@/lib/date-range";
 import { formatCurrency } from "@/lib/format";
 import { commitmentMath } from "@/lib/liabilities";
@@ -27,13 +28,41 @@ export function buildAlerts({
   prices,
   commitments,
   holdings,
+  budgets,
+  transactions,
 }: {
   wishlist: WishlistItem[];
   prices: { symbol: string; lastPrice: string }[];
   commitments: Commitment[];
   holdings: Holding[];
+  budgets?: Budget[];
+  transactions?: Transaction[];
 }): Alert[] {
   const alerts: Alert[] = [];
+
+  // Over budget is worth saying; 80% is worth saying *earlier*, while there's
+  // still a month left to act on it.
+  for (const status of budgetStatuses(budgets, transactions)) {
+    if (status.over) {
+      alerts.push({
+        id: `budget-${status.budget.id}`,
+        title: `${status.budget.category} is over budget`,
+        detail: `${formatCurrency(-status.remaining)} past the ${formatCurrency(
+          status.limit,
+        )} cap`,
+        href: "/income-expense",
+        tone: "warning",
+      });
+    } else if (status.nearLimit) {
+      alerts.push({
+        id: `budget-${status.budget.id}`,
+        title: `${status.budget.category} is close to its cap`,
+        detail: `${formatCurrency(status.remaining)} left of ${formatCurrency(status.limit)}`,
+        href: "/income-expense",
+        tone: "warning",
+      });
+    }
+  }
   const priceBySymbol = new Map(prices.map((p) => [p.symbol, Number(p.lastPrice)]));
 
   // A wishlist target is a buy price, so the market coming *down* to it is

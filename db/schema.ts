@@ -229,7 +229,31 @@ export const profile = pgTable("profile", {
 export const authConfig = pgTable("auth_config", {
   id: integer("id").primaryKey(),
   passphraseHash: text("passphrase_hash").notNull(),
+  /** Per-install salt for the scrypt hash. Null on rows written by the old
+   *  HMAC scheme, which is how verification knows which one to use. */
+  passphraseSalt: text("passphrase_salt"),
+  /** Consecutive failed logins. Reset to zero on success. */
+  failedAttempts: integer("failed_attempts").notNull().default(0),
+  /** While set and in the future, logins are refused outright. */
+  lockedUntil: timestamp("locked_until"),
+  /**
+   * Bumped to invalidate every existing session cookie at once.
+   *
+   * The cookie carries the epoch it was issued under, so "sign out everywhere"
+   * is a single increment rather than a list of tokens to track — which suits
+   * a single-user app where the only question is "is this cookie still mine".
+   */
+  sessionEpoch: integer("session_epoch").notNull().default(1),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+/** A spending cap for one category, per month. */
+export const budgets = pgTable("budgets", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  category: text("category").notNull().unique(),
+  monthlyLimit: numeric("monthly_limit", { precision: 18, scale: 2 }).notNull(),
+  currency: currencyEnum("currency").notNull().default("USD"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const dashboardSettings = pgTable("dashboard_settings", {

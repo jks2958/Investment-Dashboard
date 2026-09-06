@@ -6,6 +6,9 @@ type AuthContextValue = {
   status: "loading" | "authenticated" | "unauthenticated";
   login: (passphrase: string) => Promise<void>;
   logout: () => Promise<void>;
+  /** Re-checks the session with the server. Needed after "sign out
+   *  everywhere", which kills this device's cookie along with the rest. */
+  refresh: () => Promise<void>;
 };
 
 const AuthContext = React.createContext<AuthContextValue | null>(null);
@@ -30,8 +33,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setStatus("unauthenticated");
   }, []);
 
+  const refresh = React.useCallback(async () => {
+    try {
+      const res = await api.session();
+      setStatus(res.authenticated ? "authenticated" : "unauthenticated");
+    } catch {
+      setStatus("unauthenticated");
+    }
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ status, login, logout }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ status, login, logout, refresh }}>
+      {children}
+    </AuthContext.Provider>
   );
 }
 

@@ -12,6 +12,9 @@
       "destination": "/api/transactions?kind=recurring&id=:id"
     },
     { "source": "/api/recurring", "destination": "/api/transactions?kind=recurring" },
+    { "source": "/api/categories", "destination": "/api/transactions?kind=category" },
+    { "source": "/api/budgets/:id", "destination": "/api/transactions?kind=budget&id=:id" },
+    { "source": "/api/budgets", "destination": "/api/transactions?kind=budget" },
     { "source": "/api/auth/:action", "destination": "/api/auth?action=:action" },
     { "source": "/api/debts/:id", "destination": "/api/liabilities?kind=debt&id=:id" },
     { "source": "/api/debts", "destination": "/api/liabilities?kind=debt" },

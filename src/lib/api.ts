@@ -90,6 +90,22 @@ export type TransactionInput = {
   note?: string;
 };
 
+/** A monthly spending cap for one category. */
+export type Budget = {
+  id: number;
+  category: string;
+  monthlyLimit: string;
+  nativeMonthlyLimit: string | null;
+  currency: EntryCurrency;
+  createdAt: string;
+};
+
+export type BudgetInput = {
+  category: string;
+  monthlyLimit: number;
+  currency?: EntryCurrency;
+};
+
 export type Recurrence = "monthly" | "quarterly" | "yearly";
 
 /** A template for an entry that repeats. Never auto-posted — dueDates are the
@@ -179,6 +195,7 @@ export type WidgetType =
   | "allocation-drift"
   | "debts"
   | "debt-payoff"
+  | "budgets"
   | "commitments";
 
 export type WidgetLayoutItem = {
@@ -344,6 +361,8 @@ export const api = {
       body: JSON.stringify({ passphrase }),
     }),
   logout: () => request<{ ok: true }>("/api/auth/logout", { method: "POST" }),
+  /** Invalidates every session, this device included. */
+  revokeSessions: () => request<{ ok: true }>("/api/auth/revoke-sessions", { method: "POST" }),
   changePassphrase: (currentPassphrase: string, newPassphrase: string) =>
     request<{ ok: true }>("/api/auth/change-passphrase", {
       method: "POST",
@@ -388,6 +407,26 @@ export const api = {
     update: (id: number, input: Partial<TransactionInput>) =>
       request<Transaction>(`/api/transactions/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
     remove: (id: number) => request<void>(`/api/transactions/${id}`, { method: "DELETE" }),
+  },
+
+  budgets: {
+    list: () => request<Budget[]>("/api/budgets"),
+    /** Upserts on category, so setting a cap twice edits rather than duplicates. */
+    create: (input: BudgetInput) =>
+      request<Budget>("/api/budgets", { method: "POST", body: JSON.stringify(input) }),
+    update: (id: number, input: Partial<BudgetInput>) =>
+      request<Budget>(`/api/budgets/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
+    remove: (id: number) => request<void>(`/api/budgets/${id}`, { method: "DELETE" }),
+  },
+
+  categories: {
+    list: () => request<{ category: string; count: number }[]>("/api/categories"),
+    /** Repoints every row on `from` onto `into`. */
+    merge: (from: string, into: string) =>
+      request<{ moved: number }>("/api/categories", {
+        method: "POST",
+        body: JSON.stringify({ from, into }),
+      }),
   },
 
   recurring: {

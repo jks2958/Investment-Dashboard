@@ -2,9 +2,11 @@ import { Link } from "wouter";
 import { Bell, Check } from "lucide-react";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useBudgets } from "@/hooks/use-budgets";
 import { useCommitments } from "@/hooks/use-commitments";
 import { useHoldings } from "@/hooks/use-holdings";
 import { usePrices } from "@/hooks/use-prices";
+import { useTransactions } from "@/hooks/use-transactions";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { buildAlerts } from "@/lib/alerts";
 import { cn } from "@/lib/utils";
@@ -27,12 +29,16 @@ export function AlertsMenu() {
   const { data: prices } = usePrices();
   const { data: commitments } = useCommitments();
   const { data: holdings } = useHoldings();
+  const { data: budgets } = useBudgets();
+  const { data: transactions } = useTransactions();
 
   const alerts = buildAlerts({
     wishlist: wishlist ?? [],
     prices: prices ?? [],
     commitments: commitments ?? [],
     holdings: holdings ?? [],
+    budgets: budgets ?? [],
+    transactions: transactions ?? [],
   });
 
   return (

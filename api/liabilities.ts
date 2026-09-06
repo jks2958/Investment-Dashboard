@@ -181,7 +181,7 @@ async function handleCommitments(req: VercelRequest, res: VercelResponse, idPara
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!requireAuth(req, res)) return;
+  if (!(await requireAuth(req, res))) return;
 
   const kind = one(req.query.kind);
   const idParam = one(req.query.id);

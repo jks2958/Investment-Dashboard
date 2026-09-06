@@ -29,6 +29,7 @@ import {
   summarize,
   type TransactionFilter,
 } from "@/lib/transaction-filters";
+import { BudgetsWidget } from "@/widgets/budgets-widget";
 
 function currentMonthKey(): string {
   const d = new Date();
@@ -73,6 +74,8 @@ export function IncomeExpensePage() {
         <StatCard label={`Expenses ${scope}`} value={formatCurrency(totals.expense)} />
         <StatCard label={`Net ${scope}`} value={formatCurrency(totals.net)} />
       </div>
+
+      <BudgetsWidget manage />
 
       <RecurringCard />
 

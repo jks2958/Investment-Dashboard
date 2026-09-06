@@ -44,7 +44,7 @@ async function getOrCreateSettings() {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!requireAuth(req, res)) return;
+  if (!(await requireAuth(req, res))) return;
 
   if (req.method === "GET") {
     const settings = await getOrCreateSettings();

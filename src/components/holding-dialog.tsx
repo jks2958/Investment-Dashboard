@@ -11,9 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCreateHolding, useUpdateHolding } from "@/hooks/use-holdings";
+import { useCreateHolding, useHoldings, useUpdateHolding } from "@/hooks/use-holdings";
 import type { AssetType, Holding } from "@/lib/api";
 import { todayIso } from "@/lib/date-range";
+import { formatCurrency } from "@/lib/format";
+import { findExistingHolding, previewMerge } from "@/lib/holdings-merge";
 
 const ASSET_TYPES: { value: AssetType; label: string }[] = [
   { value: "stock", label: "Stock" },
@@ -43,7 +45,20 @@ export function HoldingDialog({
 
   const create = useCreateHolding();
   const update = useUpdateHolding();
+  const { data: holdings } = useHoldings();
   const mode = editing ? "edit" : "create";
+
+  // Adding a symbol already held: offer to combine rather than leaving the
+  // same position listed twice. Only in create mode — editing a row is
+  // already about that one row.
+  const existing = editing
+    ? undefined
+    : findExistingHolding(holdings, symbol, assetType);
+  const merge =
+    existing && Number(quantity) > 0
+      ? previewMerge(existing, Number(quantity), Number(avgCostBasis) || 0)
+      : undefined;
+  const [combine, setCombine] = React.useState(true);
 
   useFormReset(isOpen, () => {
     setSymbol(editing?.symbol ?? "");
@@ -51,6 +66,7 @@ export function HoldingDialog({
     setQuantity(editing ? String(Number(editing.quantity)) : "");
     setAvgCostBasis(editing ? String(Number(editing.avgCostBasis)) : "");
     setAcquiredOn(editing?.acquiredOn ?? todayIso());
+    setCombine(true);
     setError(null);
   });
 
@@ -65,8 +81,22 @@ export function HoldingDialog({
       ...(acquiredOn ? { acquiredOn } : {}),
     };
     try {
-      if (editing) await update.mutateAsync({ id: editing.id, input });
-      else await create.mutateAsync(input);
+      if (editing) {
+        await update.mutateAsync({ id: editing.id, input });
+      } else if (merge && combine) {
+        // The purchase date stays the original one: it records when the
+        // position was opened, and the holding period shown in the list is
+        // about that, not about the most recent top-up.
+        await update.mutateAsync({
+          id: merge.existing.id,
+          input: {
+            quantity: merge.totalQuantity,
+            avgCostBasis: merge.newAvgCost,
+          },
+        });
+      } else {
+        await create.mutateAsync(input);
+      }
       setOpen(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -139,6 +169,31 @@ export function HoldingDialog({
           />
         </div>
       </div>
+      {merge && (
+        <div className="space-y-2 rounded-lg bg-accent/60 p-3 text-xs">
+          <p className="font-medium">
+            You already hold {merge.existing.symbol.toUpperCase()}.
+          </p>
+          <label className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              checked={combine}
+              onChange={(e) => setCombine(e.target.checked)}
+              className="mt-0.5"
+            />
+            <span className="text-muted-foreground">
+              Combine with the existing position —{" "}
+              <span className="font-medium text-foreground tabular-nums">
+                {merge.totalQuantity} units at {formatCurrency(merge.newAvgCost)} average
+              </span>{" "}
+              (was {Number(merge.existing.quantity)} at{" "}
+              {formatCurrency(merge.previousAvgCost)}). Leave unticked to keep them as two
+              separate rows.
+            </span>
+          </label>
+        </div>
+      )}
+
       <div className="space-y-1.5">
         <Label htmlFor="acquiredOn">Purchase date</Label>
         <Input
@@ -149,7 +204,9 @@ export function HoldingDialog({
           onChange={(e) => setAcquiredOn(e.target.value)}
         />
         <p className="text-xs text-muted-foreground">
-          Set an earlier date to record something you bought in the past.
+          {merge && combine
+            ? "Not used when combining — the existing position keeps its original date."
+            : "Set an earlier date to record something you bought in the past."}
         </p>
       </div>
     </FormDialog>

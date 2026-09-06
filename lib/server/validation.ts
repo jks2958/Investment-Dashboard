@@ -66,6 +66,14 @@ export const transactionInsertSchema = z.object({
   note: z.string().trim().max(200).optional(),
 });
 
+export const budgetInsertSchema = z.object({
+  category: z.string().trim().min(1).max(40),
+  monthlyLimit: z.coerce.number().positive(),
+  currency: entryCurrency,
+});
+
+export const budgetUpdateSchema = budgetInsertSchema.partial();
+
 export const transactionUpdateSchema = transactionInsertSchema.partial();
 
 export const recurringInsertSchema = z.object({
@@ -187,6 +195,7 @@ export const widgetTypeSchema = z.enum([
   "allocation-drift",
   "debts",
   "debt-payoff",
+  "budgets",
   "commitments",
 ]);
 

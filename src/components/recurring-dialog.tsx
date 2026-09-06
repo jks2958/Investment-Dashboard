@@ -20,6 +20,7 @@ import type {
   TransactionType,
 } from "@/lib/api";
 import { todayIso } from "@/lib/date-range";
+import { useCategories } from "@/hooks/use-categories";
 
 const RECURRENCE_LABEL: Record<Recurrence, string> = {
   monthly: "Every month",
@@ -46,6 +47,7 @@ export function RecurringDialog({
   const [endsOn, setEndsOn] = React.useState("");
   const [note, setNote] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
+  const { data: knownCategories } = useCategories();
 
   const create = useCreateRecurring();
   const update = useUpdateRecurring();
@@ -135,11 +137,21 @@ export function RecurringDialog({
         <Label htmlFor="recCategory">Category</Label>
         <Input
           id="recCategory"
+          list="known-categories"
+          autoCapitalize="none"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           placeholder={type === "expense" ? "Rent" : "Salary"}
           required
         />
+        {/* Native datalist rather than a custom combobox: it autocompletes on
+            iOS without extra state, and the server folds case differences
+            anyway, so picking from the list is a convenience not a guard. */}
+        <datalist id="known-categories">
+          {(knownCategories ?? []).map((c) => (
+            <option key={c.category} value={c.category} />
+          ))}
+        </datalist>
       </div>
 
       <MoneyInput

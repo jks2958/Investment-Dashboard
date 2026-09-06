@@ -7,6 +7,7 @@ import { HoldingsByTypePage } from "@/pages/holdings-by-type";
 import { WishlistPage } from "@/pages/wishlist";
 import { AllocationDriftWidget } from "@/widgets/allocation-drift-widget";
 import { AllocationWidget } from "@/widgets/allocation-widget";
+import { BudgetsWidget } from "@/widgets/budgets-widget";
 import { CashAccountsWidget } from "@/widgets/cash-accounts-widget";
 import { CashRunwayWidget } from "@/widgets/cash-runway-widget";
 import { CommitmentsWidget } from "@/widgets/commitments-widget";
@@ -151,6 +152,11 @@ export const WIDGET_REGISTRY: Record<WidgetType, WidgetDefinition> = {
     label: "Debt Payoff Plan",
     Component: DebtPayoffWidget,
     defaultSize: { w: 4, h: 9 },
+  },
+  budgets: {
+    label: "Budgets",
+    Component: BudgetsWidget,
+    defaultSize: { w: 4, h: 8 },
   },
   commitments: {
     label: "Future Commitments",

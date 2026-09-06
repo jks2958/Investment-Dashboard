@@ -8,7 +8,7 @@ import { refreshStalePrices } from "../lib/server/marketData.js";
 import { holdingInsertSchema, holdingUpdateSchema } from "../lib/server/validation.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!requireAuth(req, res)) return;
+  if (!(await requireAuth(req, res))) return;
 
   const rawId = req.query.id;
   const idParam = Array.isArray(rawId) ? rawId[0] : rawId;

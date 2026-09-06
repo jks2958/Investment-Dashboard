@@ -9,7 +9,7 @@ const PROFILE_ID = 1;
 const DEFAULT_NAME = "Investor";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!requireAuth(req, res)) return;
+  if (!(await requireAuth(req, res))) return;
 
   if (req.method === "GET") {
     const [row] = await db.select().from(profile).limit(1);

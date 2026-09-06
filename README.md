@@ -71,12 +71,40 @@ To deploy: import the repo into Vercel, set the same env vars there, and connect
 - **Wishlist** — symbols you're watching, with an optional target price.
 - **Account** — display name, cash accounts CRUD, other assets CRUD.
 
+Adding a symbol you already hold offers to **combine** it with the existing
+position, computing the new cost-weighted average, rather than leaving the same
+holding listed twice. The purchase date stays the original one — it records
+when the position was opened, which is what the holding period is about.
+
 Holdings, cash accounts and other assets each take a date (purchase date /
 opened on / acquired on), pre-filled with today but freely backdated, so assets
 can be entered retrospectively. Holdings show how long they've been held. The
 date is a record of when you acquired something — it does not rewrite past
 `net_worth_snapshots`, which only accumulate from the day you start using the
 app.
+
+## Security
+
+The dashboard sits on a public URL behind one passphrase, so the login is
+hardened rather than trusted:
+
+- **Rate limited.** Five free attempts, then a lockout that doubles from 30
+  seconds up to 15 minutes, tracked in `auth_config`. The lock is checked
+  before the passphrase is read, so a locked-out guesser learns nothing from
+  the response either way. This is what stops online brute force; nothing here
+  helps against someone who already has the database.
+- **scrypt, not a bare HMAC.** N=32768 at ~100ms a hash. Note that this needs
+  `maxmem` raised alongside `N`: 128·N·r is exactly Node's 32MB default, and
+  the check throws rather than degrading — getting that wrong fails *every*
+  login, including the one that would let you fix it. Passphrases stored under
+  the old unsalted HMAC still verify and are re-stored under scrypt on the next
+  successful login, so the upgrade needs nothing from you.
+- **Revocable sessions.** Cookies last 7 days and carry the `session_epoch`
+  they were issued under. **Settings → Sign out everywhere** increments it,
+  which kills every cookie at once — including the current one, because
+  "everywhere" has to mean everywhere if a lost device is the reason you're
+  clicking it. This is why `requireAuth` is async: validity depends on stored
+  state, not just the cookie's own signature.
 
 ## Editing and deleting
 
@@ -96,8 +124,10 @@ the confirmation names the record and what's lost with it rather than asking
 ## Header
 
 The search box opens a **command palette** (`⌘K` / `Ctrl-K`): it searches your
-own holdings, wishlist and accounts, jumps to any page, and starts an entry via
-the same dialogs the pages use. The **bell** shows real alerts derived from data
+own holdings, wishlist, accounts and transactions, jumps to any page, and
+starts an entry via the same dialogs the pages use. Transactions are excluded
+from the empty-query list — the palette opens as a launcher and becomes a
+search once you type — and matched on category, note, date and amount. The **bell** shows real alerts derived from data
 already loaded — a wishlist target reached, a commitment due within 90 days and
 underfunded, prices that have gone stale, holdings the provider couldn't price —
 so opening it costs no extra requests. Nothing is dismissable per-item: each
@@ -246,6 +276,31 @@ exists, so a double tap can't duplicate an entry.
 
 A template starting on the 31st clamps to the last day of shorter months rather
 than rolling into the 1st, which would drift the whole series forward.
+
+### Categories
+
+Category is free text, and the expense breakdown groups by it — so "Groceries"
+typed once and "groceries" the next time used to become two slices, two filter
+entries and two half-sized numbers, with nothing to signal it. On a tablet that
+capitalises the first letter for you, that isn't an edge case.
+
+New entries are folded onto an existing spelling that differs only by case or
+surrounding space, most-used spelling winning. The form autocompletes from
+categories already in use. **Settings → Tidy up categories** merges duplicates
+recorded before this existed, repointing transactions, recurring templates and
+budgets together.
+
+Comparisons are `btrim(lower(...))` on both sides. Lower-casing alone leaves a
+row saved as `"  Groceries "` unmatchable, sitting in every report as its own
+category forever.
+
+### Budgets
+
+A monthly cap per category under **Income / Expense**, compared against the
+calendar month's expenses. The bar turns amber at 80% and red past the cap, and
+the bell raises both — 80% while there's still a month left to act on it, not
+only after it's blown. Spend is matched case-insensitively so a cap still bites
+on rows that predate category folding.
 
 ### Filtering the transaction log
 

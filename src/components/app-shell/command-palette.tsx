@@ -24,7 +24,10 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useCashAccounts } from "@/hooks/use-cash";
 import { useHoldings } from "@/hooks/use-holdings";
 import { useOtherAssets } from "@/hooks/use-other-assets";
+import { useTransactions } from "@/hooks/use-transactions";
 import { useWishlist } from "@/hooks/use-wishlist";
+import { formatDateShort } from "@/lib/date-range";
+import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 type QuickAction = "holding" | "transaction" | "cash" | "other-asset" | "wishlist";
@@ -85,6 +88,7 @@ export function CommandPalette() {
   const { data: wishlist } = useWishlist();
   const { data: cash } = useCashAccounts();
   const { data: otherAssets } = useOtherAssets();
+  const { data: transactions } = useTransactions();
 
   /** Every open starts from a blank query, so the palette never reopens
    *  showing the last thing searched for. */
@@ -146,13 +150,31 @@ export function CommandPalette() {
     for (const a of otherAssets ?? []) {
       rows.push({ id: `o-${a.id}`, label: a.name, hint: "other asset", group: "Accounts", icon: Boxes, href: "/account" });
     }
+    // The transaction log is the biggest table and the one you'd actually
+    // search — "that thing in March". Capped so a long history can't drown
+    // out pages and actions, and the filter below trims it further.
+    for (const t of (transactions ?? []).slice(0, 400)) {
+      rows.push({
+        id: `t-${t.id}`,
+        label: t.category,
+        hint: `${formatDateShort(t.occurredOn)} · ${t.type === "income" ? "+" : "-"}${formatCurrency(
+          Number(t.amount),
+        )}${t.note ? ` · ${t.note}` : ""}`,
+        group: "Transactions",
+        icon: Receipt,
+        href: "/income-expense",
+      });
+    }
     return rows;
-  }, [holdings, wishlist, cash, otherAssets]);
+  }, [holdings, wishlist, cash, otherAssets, transactions]);
 
-  const results = React.useMemo(
-    () => [...ACTIONS, ...PAGES, ...records].filter((item) => matches(item, query)).slice(0, 12),
-    [records, query],
-  );
+  const results = React.useMemo(() => {
+    const all = [...ACTIONS, ...PAGES, ...records];
+    // With no query, showing 400 transactions under the actions is noise —
+    // the palette opens as a launcher and becomes a search once you type.
+    const pool = query.trim() ? all : all.filter((item) => item.group !== "Transactions");
+    return pool.filter((item) => matches(item, query)).slice(0, 12);
+  }, [records, query]);
 
   // A shrinking result list can leave the highlight past the end.
   const activeIndex = Math.min(active, Math.max(results.length - 1, 0));

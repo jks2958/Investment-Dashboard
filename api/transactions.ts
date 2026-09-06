@@ -1,12 +1,19 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { desc, eq, gte } from "drizzle-orm";
+import { asc, desc, eq, gte } from "drizzle-orm";
 
 import { db } from "../db/client.js";
-import { recurringTransactions, transactions } from "../db/schema.js";
+import { budgets, recurringTransactions, transactions } from "../db/schema.js";
+import {
+  canonicalCategory,
+  listCategories,
+  mergeCategory,
+} from "../lib/server/categories.js";
 import { listRecurring, postDueTransactions } from "../lib/server/recurring.js";
 import { currentUsdPkrRate, withUsd } from "../lib/server/money.js";
 import { requireAuth } from "../lib/server/requireAuth.js";
 import {
+  budgetInsertSchema,
+  budgetUpdateSchema,
   recurringInsertSchema,
   recurringUpdateSchema,
   transactionInsertSchema,
@@ -23,6 +30,87 @@ function one(value: string | string[] | undefined): string | undefined {
  * project sits at 11, so `/api/recurring` is a rewrite onto `?kind=recurring`
  * instead of a twelfth.
  */
+/** Budgets ride along here too — same reasoning as recurring templates: the
+ *  Hobby function cap leaves no room for a file of their own. */
+async function handleBudgets(req: VercelRequest, res: VercelResponse, idParam?: string) {
+  const rate = await currentUsdPkrRate();
+
+  if (idParam === undefined) {
+    if (req.method === "GET") {
+      const rows = await db.select().from(budgets).orderBy(asc(budgets.category));
+      res.status(200).json(rows.map((row) => withUsd(row, ["monthlyLimit"], rate)));
+      return;
+    }
+
+    if (req.method === "POST") {
+      const parsed = budgetInsertSchema.safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid input" });
+        return;
+      }
+      const { monthlyLimit, category, ...rest } = parsed.data;
+      // Match the category to one already in use, so a budget for "groceries"
+      // governs the "Groceries" rows rather than sitting beside them.
+      const canonical = await canonicalCategory(category);
+      const [created] = await db
+        .insert(budgets)
+        .values({ ...rest, category: canonical, monthlyLimit: String(monthlyLimit) })
+        .onConflictDoUpdate({
+          target: budgets.category,
+          set: { monthlyLimit: String(monthlyLimit), ...rest },
+        })
+        .returning();
+      res.status(201).json(withUsd(created, ["monthlyLimit"], rate));
+      return;
+    }
+
+    res.status(405).json({ error: "Method not allowed" });
+    return;
+  }
+
+  const id = Number(idParam);
+  if (!Number.isInteger(id)) {
+    res.status(400).json({ error: "Invalid id" });
+    return;
+  }
+
+  if (req.method === "PATCH") {
+    const parsed = budgetUpdateSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid input" });
+      return;
+    }
+    const { monthlyLimit, ...rest } = parsed.data;
+    const updates: Record<string, unknown> = { ...rest };
+    if (monthlyLimit !== undefined) updates.monthlyLimit = String(monthlyLimit);
+
+    const [updated] = await db
+      .update(budgets)
+      .set(updates)
+      .where(eq(budgets.id, id))
+      .returning();
+
+    if (!updated) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
+    res.status(200).json(withUsd(updated, ["monthlyLimit"], rate));
+    return;
+  }
+
+  if (req.method === "DELETE") {
+    const [deleted] = await db.delete(budgets).where(eq(budgets.id, id)).returning();
+    if (!deleted) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
+    res.status(204).end();
+    return;
+  }
+
+  res.status(405).json({ error: "Method not allowed" });
+}
+
 async function handleRecurring(req: VercelRequest, res: VercelResponse, idParam?: string) {
   if (idParam === undefined) {
     if (req.method === "GET") {
@@ -104,9 +192,34 @@ async function handleRecurring(req: VercelRequest, res: VercelResponse, idParam?
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!requireAuth(req, res)) return;
+  if (!(await requireAuth(req, res))) return;
 
   const idParam = one(req.query.id);
+
+  if (one(req.query.kind) === "budget") {
+    await handleBudgets(req, res, idParam);
+    return;
+  }
+
+  if (one(req.query.kind) === "category") {
+    if (req.method === "GET") {
+      res.status(200).json(await listCategories());
+      return;
+    }
+    if (req.method === "POST") {
+      const body = req.body as { from?: unknown; into?: unknown };
+      const from = typeof body?.from === "string" ? body.from.trim() : "";
+      const into = typeof body?.into === "string" ? body.into.trim() : "";
+      if (!from || !into) {
+        res.status(400).json({ error: "Both categories are required" });
+        return;
+      }
+      res.status(200).json(await mergeCategory(from, into));
+      return;
+    }
+    res.status(405).json({ error: "Method not allowed" });
+    return;
+  }
 
   if (one(req.query.kind) === "recurring") {
     await handleRecurring(req, res, idParam);
@@ -151,6 +264,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       const { amount, ...rest } = parsed.data;
+      rest.category = await canonicalCategory(rest.category);
       const rate = await currentUsdPkrRate();
       // Stamped now and never revisited, which is what makes historical
       // figures stable.
@@ -185,6 +299,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const { amount, ...rest } = parsed.data;
     const updates: Record<string, unknown> = { ...rest };
+    if (rest.category !== undefined) updates.category = await canonicalCategory(rest.category);
     if (amount !== undefined) updates.amount = String(amount);
 
     const rate = await currentUsdPkrRate();

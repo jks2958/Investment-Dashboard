@@ -25,7 +25,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  if (!requireAuth(req, res)) return;
+  if (!(await requireAuth(req, res))) return;
 
   if (req.method === "GET") {
     // ?all=1 returns the full history for the editor; otherwise a range that
